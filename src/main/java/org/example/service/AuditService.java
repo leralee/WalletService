@@ -1,0 +1,37 @@
+package org.example.service;
+
+import org.example.model.Audit;
+import org.example.repository.AuditRepository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * Сервис для ведения журнала аудита в приложении Wallet Service.
+ * Позволяет записывать различные действия, производимые игроками, для последующего анализа.
+ */
+public class AuditService {
+    private final AuditRepository auditRepository;
+
+    public AuditService(AuditRepository auditRepository) {
+        this.auditRepository = auditRepository;
+    }
+
+    /**
+     * Сервис для ведения журнала аудита в приложении Wallet Service.
+     * Позволяет записывать различные действия, производимые игроками, для последующего анализа.
+     */
+    public void recordAction(Long playerId, Audit.ActionType actionType) {
+        Audit record = new Audit(playerId, actionType, LocalDateTime.now());
+        auditRepository.addRecord(record);
+    }
+
+    /**
+     * Извлекает все записи аудита.
+     *
+     * @return Список записей аудита.
+     */
+    public List<Audit> getRecords() {
+        return auditRepository.getAllRecords();
+    }
+}
