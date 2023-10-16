@@ -1,18 +1,15 @@
 package org.example.repository;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.example.model.Audit;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * @author valeriali on {10.10.2023}
- * @project walletService
- */
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class AuditRepositoryTest {
     private AuditRepository repository;
 
@@ -22,15 +19,17 @@ public class AuditRepositoryTest {
     }
 
     @Test
+    @DisplayName("Добавление записи: Должен добавить запись аудита")
     public void addRecord_ShouldAddAuditRecord() {
         Audit audit = new Audit(1L, Audit.ActionType.LOGIN, LocalDateTime.now());
         repository.addRecord(audit);
 
         List<Audit> records = repository.getAllRecords();
-        assertTrue(records.contains(audit));
+        assertThat(records).contains(audit);
     }
 
     @Test
+    @DisplayName("Получить все записи: Должен вернуть все добавленные записи")
     public void getAllRecords_ShouldReturnAllAddedRecords() {
         Audit audit1 = new Audit(1L, Audit.ActionType.LOGIN, LocalDateTime.now());
         Audit audit2 = new Audit(2L, Audit.ActionType.LOGOUT, LocalDateTime.now());
@@ -39,8 +38,6 @@ public class AuditRepositoryTest {
         repository.addRecord(audit2);
 
         List<Audit> records = repository.getAllRecords();
-        assertEquals(2, records.size());
-        assertTrue(records.contains(audit1));
-        assertTrue(records.contains(audit2));
+        assertThat(records).hasSize(2).contains(audit1, audit2);
     }
 }

@@ -1,7 +1,7 @@
 package org.example.service;
 
+import org.example.interfaces.IAuditRepository;
 import org.example.model.Audit;
-import org.example.repository.AuditRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,9 +11,9 @@ import java.util.List;
  * Позволяет записывать различные действия, производимые игроками, для последующего анализа.
  */
 public class AuditService {
-    private final AuditRepository auditRepository;
+    private final IAuditRepository auditRepository;
 
-    public AuditService(AuditRepository auditRepository) {
+    public AuditService(IAuditRepository auditRepository) {
         this.auditRepository = auditRepository;
     }
 

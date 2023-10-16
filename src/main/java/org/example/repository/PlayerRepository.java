@@ -1,5 +1,6 @@
 package org.example.repository;
 
+import org.example.interfaces.IPlayerRepository;
 import org.example.model.Player;
 
 import java.util.HashMap;
@@ -9,7 +10,7 @@ import java.util.Optional;
 /**
  * Репозиторий для хранения и управления игроками.
  */
-public class PlayerRepository {
+public class PlayerRepository implements IPlayerRepository {
 
     private final Map<Long, Player> playerStorage = new HashMap<>();
     private long currentId = 1;

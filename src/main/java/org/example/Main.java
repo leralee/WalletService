@@ -1,6 +1,10 @@
 package org.example;
 
-import org.example.in.UserInputHandler;
+import org.example.in.WalletServiceFacade;
+import org.example.in.WalletServiceHandler;
+import org.example.interfaces.IAuditRepository;
+import org.example.interfaces.IPlayerRepository;
+import org.example.interfaces.ITransactionRepository;
 import org.example.model.Player;
 import org.example.repository.AuditRepository;
 import org.example.repository.PlayerRepository;
@@ -9,19 +13,11 @@ import org.example.service.AuditService;
 import org.example.service.PlayerService;
 import org.example.service.TransactionService;
 
-import java.util.UUID;
-
-/**
- * Hello world!
- *
- */
-public class Main
-{
-    public static void main( String[] args )
-    {
-        PlayerRepository playerRepository = new PlayerRepository();
-        TransactionRepository transactionRepository = new TransactionRepository();
-        AuditRepository auditRepository = new AuditRepository();
+public class Main {
+    public static void main(String[] args) {
+        IPlayerRepository playerRepository = new PlayerRepository();
+        ITransactionRepository transactionRepository = new TransactionRepository();
+        IAuditRepository auditRepository = new AuditRepository();
 
 
         AuditService auditService = new AuditService(auditRepository);
@@ -31,7 +27,9 @@ public class Main
 
         playerService.registerPlayer("admin", "admin", Player.Role.ADMIN);
 
-        UserInputHandler userInputHandler = new UserInputHandler(playerService, transactionService, auditService);
+        WalletServiceFacade walletServiceFacade = new WalletServiceFacade(playerService, transactionService, auditService);
+
+        WalletServiceHandler userInputHandler = new WalletServiceHandler(walletServiceFacade);
         userInputHandler.start();
     }
 }

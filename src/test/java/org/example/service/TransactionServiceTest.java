@@ -4,13 +4,14 @@ import org.example.model.Audit;
 import org.example.model.Player;
 import org.example.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 /**
@@ -32,35 +33,65 @@ public class TransactionServiceTest {
     }
 
     @Test
-    void credit_TransactionExists() {
-        UUID transactionId = UUID.randomUUID();
-        when(transactionRepository.existsById(transactionId)).thenReturn(true);
-
-        assertFalse(transactionService.credit(new Player(), BigDecimal.TEN, transactionId));
-    }
-
-    @Test
-    void credit_NegativeAmount() {
-        UUID transactionId = UUID.randomUUID();
-        when(transactionRepository.existsById(transactionId)).thenReturn(false);
-
-        assertFalse(transactionService.credit(new Player(), BigDecimal.valueOf(-10), transactionId));
-    }
-
-    @Test
-    void withdraw_Successful() {
+    @DisplayName("Успешное снятие средств")
+    void withdraw_Successful() throws Exception {
         Player player = new Player();
         player.setId(1L);
         player.setBalance(BigDecimal.valueOf(100));
         UUID transactionId = UUID.randomUUID();
         when(transactionRepository.existsById(transactionId)).thenReturn(false);
 
-        assertTrue(transactionService.withdraw(player, BigDecimal.valueOf(50), transactionId));
+        transactionService.withdraw(player, BigDecimal.valueOf(50), transactionId);
         verify(playerService).updateBalance(eq(player), eq(BigDecimal.valueOf(50)));
         verify(auditService).recordAction(eq(player.getId()), eq(Audit.ActionType.WITHDRAW));
     }
 
     @Test
+    @DisplayName("Снятие средств с уже существующим ID")
+    void withdraw_ExistingTransactionId() {
+        Player player = new Player();
+        player.setId(1L);
+
+        UUID transactionId = UUID.randomUUID();
+        when(transactionRepository.existsById(transactionId)).thenReturn(true);
+
+        assertThatThrownBy(() -> transactionService.withdraw(player, BigDecimal.TEN, transactionId))
+                .isInstanceOf(TransactionService.TransactionExistsException.class);
+
+        verify(playerService, never()).updateBalance(any(Player.class), any(BigDecimal.class));
+        verify(auditService).recordAction(anyLong(), eq(Audit.ActionType.WITHDRAW_FAILED));
+    }
+
+    @Test
+    @DisplayName("Проведение транзакции при существующем ID транзакции")
+    void credit_TransactionExists() {
+        UUID transactionId = UUID.randomUUID();
+        Player player = new Player();
+
+        when(transactionRepository.existsById(transactionId)).thenReturn(true);
+
+        assertThatThrownBy(() -> transactionService.credit(player, BigDecimal.TEN, transactionId))
+                .isInstanceOf(TransactionService.TransactionExistsException.class);
+
+
+        verify(auditService, times(1)).recordAction(player.getId(), Audit.ActionType.CREDIT_FAILED);
+        verify(playerService, never()).updateBalance(any(), any());
+        verify(transactionRepository, never()).addTransaction(any());
+    }
+
+    @Test
+    @DisplayName("Пополнение счета с отрицательной или нулевой суммой")
+    void credit_NegativeAmount() {
+        UUID transactionId = UUID.randomUUID();
+        Player player = new Player();
+        when(transactionRepository.existsById(transactionId)).thenReturn(false);
+
+        assertThatThrownBy(() -> transactionService.credit(player, BigDecimal.ZERO, transactionId))
+                .isInstanceOf(TransactionService.InvalidAmountException.class);
+    }
+
+    @Test
+    @DisplayName("Снятие суммы больше остатка на счете")
     void withdraw_AmountGreaterThanBalance() {
         Player player = new Player();
         player.setId(1L);
@@ -68,12 +99,15 @@ public class TransactionServiceTest {
         UUID transactionId = UUID.randomUUID();
         when(transactionRepository.existsById(transactionId)).thenReturn(false);
 
-        assertFalse(transactionService.withdraw(player, BigDecimal.valueOf(50), transactionId));
+        assertThatThrownBy(() -> transactionService.withdraw(player, BigDecimal.valueOf(50), transactionId))
+                .isInstanceOf(TransactionService.InvalidAmountException.class);
+
         verify(playerService, never()).updateBalance(any(Player.class), any(BigDecimal.class));
-        verify(auditService, never()).recordAction(anyLong(), eq(Audit.ActionType.WITHDRAW));
+        verify(auditService).recordAction(anyLong(), eq(Audit.ActionType.WITHDRAW_FAILED));
     }
 
     @Test
+    @DisplayName("Снятие отрицательной суммы")
     void withdraw_NegativeAmount() {
         Player player = new Player();
         player.setId(1L);
@@ -81,21 +115,10 @@ public class TransactionServiceTest {
         UUID transactionId = UUID.randomUUID();
         when(transactionRepository.existsById(transactionId)).thenReturn(false);
 
-        assertFalse(transactionService.withdraw(player, BigDecimal.valueOf(-10), transactionId));
-        verify(playerService, never()).updateBalance(any(Player.class), any(BigDecimal.class));
-        verify(auditService, never()).recordAction(anyLong(), eq(Audit.ActionType.WITHDRAW));
-    }
+        assertThatThrownBy(() -> transactionService.withdraw(player, BigDecimal.valueOf(-10), transactionId))
+                .isInstanceOf(TransactionService.InvalidAmountException.class);
 
-    @Test
-    void withdraw_ExistingTransactionId() {
-        Player player = new Player();
-        player.setId(1L);
-        player.setBalance(BigDecimal.valueOf(100));
-        UUID transactionId = UUID.randomUUID();
-        when(transactionRepository.existsById(transactionId)).thenReturn(true);
-
-        assertFalse(transactionService.withdraw(player, BigDecimal.valueOf(50), transactionId));
         verify(playerService, never()).updateBalance(any(Player.class), any(BigDecimal.class));
-        verify(auditService, never()).recordAction(anyLong(), eq(Audit.ActionType.WITHDRAW));
+        verify(auditService).recordAction(anyLong(), eq(Audit.ActionType.WITHDRAW_FAILED));
     }
 }

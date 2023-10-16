@@ -10,7 +10,6 @@ public class Audit {
     private final LocalDateTime timestamp;
 
 
-
     public enum ActionType {
         LOGIN,
         LOGIN_FAILED,
@@ -28,6 +27,7 @@ public class Audit {
         this.actionType = actionType;
         this.timestamp = timestamp;
     }
+
     public long getPlayerId() {
         return playerId;
     }

@@ -1,6 +1,5 @@
-package org.example.repository;
+package org.example.interfaces;
 
-import org.example.interfaces.ITransactionRepository;
 import org.example.model.Transaction;
 
 import java.util.HashMap;
@@ -8,19 +7,17 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Репозиторий для хранения и управления транзакциями.
+ * @author valeriali on {15.10.2023}
+ * @project walletService
  */
-public class TransactionRepository implements ITransactionRepository {
-    private final Map<UUID, Transaction> transactions = new HashMap<>();
+public interface ITransactionRepository {
 
     /**
      * Добавляет новую транзакцию в репозиторий.
      *
      * @param transaction Объект транзакции, который необходимо добавить.
      */
-    public void addTransaction(Transaction transaction) {
-        transactions.put(transaction.getTransactionId(), transaction);
-    }
+    void addTransaction(Transaction transaction);
 
     /**
      * Проверяет существование транзакции по указанному идентификатору.
@@ -28,7 +25,5 @@ public class TransactionRepository implements ITransactionRepository {
      * @param transactionId Идентификатор транзакции для проверки.
      * @return true, если транзакция с таким идентификатором существует, иначе false.
      */
-    public boolean existsById(UUID transactionId) {
-        return transactions.containsKey(transactionId);
-    }
+    boolean existsById(UUID transactionId);
 }

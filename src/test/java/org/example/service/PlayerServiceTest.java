@@ -4,19 +4,17 @@ import org.example.model.Audit;
 import org.example.model.Player;
 import org.example.repository.PlayerRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-/**
- * @author valeriali on {10.10.2023}
- * @project walletService
- */
+
 public class PlayerServiceTest {
     private PlayerRepository playerRepository;
     private AuditService auditService;
@@ -30,6 +28,7 @@ public class PlayerServiceTest {
     }
 
     @Test
+    @DisplayName("Регистрация игрока: успешная регистрация")
     void registerPlayer_ShouldRegisterSuccessfully() {
         when(playerRepository.findByName("John")).thenReturn(Optional.empty());
 
@@ -41,25 +40,27 @@ public class PlayerServiceTest {
 
         Optional<Player> player = playerService.registerPlayer("John", "password123", Player.Role.USER);
 
-        assertTrue(player.isPresent());
-        assertEquals("John", player.get().getUsername());
+        assertThat(player).isPresent();
+        assertThat(player.get().getUsername()).isEqualTo("John");
 
         verify(auditService).recordAction(1L, Audit.ActionType.REGISTRATION_SUCCESS);
     }
 
     @Test
+    @DisplayName("Регистрация игрока: неудачная регистрация")
     void registerPlayer_ShouldNotRegister() {
         Player existingPlayer = new Player();
         existingPlayer.setUsername("John");
         when(playerRepository.findByName("John")).thenReturn(Optional.of(existingPlayer));
 
-        Optional<Player> player = playerService.registerPlayer("John", "password123",
+        Optional<Player> player = playerService.registerPlayer("John", "pass123",
                 Player.Role.USER);
-        assertFalse(player.isPresent());
+        assertThat(player).isNotPresent();
         verify(auditService).recordAction(eq(-1L), eq(Audit.ActionType.REGISTRATION_FAILED));
     }
 
     @Test
+    @DisplayName("Авторизация игрока: успешная авторизация")
     public void authorizePlayer_ShouldReturnPlayerOnSuccessfulAuthorization() {
         String username = "John";
         String password = "pass123";
@@ -70,11 +71,12 @@ public class PlayerServiceTest {
 
         Player result = playerService.authorizePlayer(username, password);
 
-        assertNotNull(result);
-        assertEquals(username, result.getUsername());
+        assertThat(result).isNotNull();
+        assertThat(result.getUsername()).isEqualTo(username);
     }
 
     @Test
+    @DisplayName("Авторизация игрока: неудачная авторизация")
     public void authorizePlayer_ShouldReturnNullOnFailedAuthorization() {
         String username = "John";
         String password = "wrongPass";
@@ -85,10 +87,11 @@ public class PlayerServiceTest {
 
         Player result = playerService.authorizePlayer(username, password);
 
-        assertNull(result);
+        assertThat(result).isNull();
     }
 
     @Test
+    @DisplayName("Получение баланса игрока")
     public void getPlayerBalance_ShouldReturnPlayerBalance() {
         long playerId = 1L;
         BigDecimal balance = BigDecimal.valueOf(100.0);
@@ -99,10 +102,11 @@ public class PlayerServiceTest {
 
         BigDecimal result = playerService.getPlayerBalance(playerId);
 
-        assertEquals(balance, result);
+        assertThat(result).isEqualTo(balance);
     }
 
     @Test
+    @DisplayName("Обновление баланса игрока")
     public void updateBalance_ShouldUpdatePlayerBalance() {
         BigDecimal newBalance = BigDecimal.valueOf(150.0);
         Player player = new Player();
@@ -110,7 +114,7 @@ public class PlayerServiceTest {
 
         playerService.updateBalance(player, newBalance);
 
-        assertEquals(newBalance, player.getBalance());
+        assertThat(player.getBalance()).isEqualTo(newBalance);
         verify(playerRepository, times(1)).save(player);
     }
 }

@@ -1,5 +1,6 @@
 package org.example.service;
 
+import org.example.interfaces.IPlayerRepository;
 import org.example.model.Audit;
 import org.example.model.Player;
 import org.example.repository.PlayerRepository;
@@ -13,11 +14,11 @@ import java.util.Optional;
  * Предоставляет методы для регистрации, авторизации и получения баланса игрока.
  */
 public class PlayerService {
-    private final PlayerRepository playerRepository;
+    private final IPlayerRepository playerRepository;
     private final AuditService auditService;
 
 
-    public PlayerService(PlayerRepository playerRepository, AuditService auditService){
+    public PlayerService(IPlayerRepository playerRepository, AuditService auditService) {
         this.playerRepository = playerRepository;
         this.auditService = auditService;
     }
@@ -28,7 +29,7 @@ public class PlayerService {
      *
      * @param username Имя пользователя для регистрации.
      * @param password Пароль пользователя.
-     * @param role Роль игрока.
+     * @param role     Роль игрока.
      * @return Optional содержащий объект игрока, если регистрация прошла успешно.
      */
     public Optional<Player> registerPlayer(String username, String password, Player.Role role) {
@@ -59,9 +60,16 @@ public class PlayerService {
      * @return Объект игрока, если авторизация прошла успешно, иначе - null.
      */
     public Player authorizePlayer(String username, String password) {
-        return playerRepository.findByName(username)
+        Player authorizedPlayer = playerRepository.findByName(username)
                 .filter(player -> BCrypt.checkpw(password, player.getPassword()))
                 .orElse(null);
+        if (authorizedPlayer != null) {
+            auditService.recordAction(authorizedPlayer.getId(), Audit.ActionType.LOGIN);
+        } else {
+            auditService.recordAction(null, Audit.ActionType.LOGIN_FAILED);
+        }
+
+        return authorizedPlayer;
     }
 
     /**
@@ -72,19 +80,23 @@ public class PlayerService {
      */
     public BigDecimal getPlayerBalance(long playerId) {
         return playerRepository.findById(playerId)
-                .map(Player :: getBalance)
+                .map(Player::getBalance)
                 .orElse(BigDecimal.ZERO);
     }
 
     /**
      * Обновляет баланс указанного игрока и сохраняет изменения в репозитории.
      *
-     * @param player Объект игрока, чей баланс требуется обновить.
+     * @param player     Объект игрока, чей баланс требуется обновить.
      * @param newBalance Новое значение баланса для указанного игрока.
      */
     public void updateBalance(Player player, BigDecimal newBalance) {
         player.setBalance(newBalance);
         playerRepository.save(player);
+    }
+
+    public void logout(Player currentPlayer) {
+        auditService.recordAction(currentPlayer.getId(), Audit.ActionType.LOGOUT);
     }
 
 }

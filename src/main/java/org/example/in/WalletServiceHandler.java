@@ -2,12 +2,12 @@ package org.example.in;
 
 import org.example.model.Audit;
 import org.example.model.Player;
-import org.example.service.AuditService;
-import org.example.service.PlayerService;
-import org.example.service.TransactionService;
+
+import org.example.service.TransactionService.TransactionExistsException;
+import org.example.service.TransactionService.InvalidAmountException;
+
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -18,20 +18,16 @@ import java.util.UUID;
  * Предоставляет консольный интерфейс для регистрации, авторизации, просмотра баланса,
  * пополнения и снятия средств, а также, при наличии соответствующих прав, просмотра журнала аудита.
  */
-public class UserInputHandler {
-    private final PlayerService playerService;
-    private final TransactionService transactionService;
+public class WalletServiceHandler {
 
-    private final AuditService auditService;
+
+    private final WalletServiceFacade walletServiceFacade;
     private Player currentPlayer;
     private final Scanner scanner = new Scanner(System.in);
 
 
-    public UserInputHandler(PlayerService playerService, TransactionService transactionService,
-                            AuditService auditService) {
-        this.auditService = auditService;
-        this.playerService = playerService;
-        this.transactionService = transactionService;
+    public WalletServiceHandler(WalletServiceFacade walletServiceFacade) {
+        this.walletServiceFacade = walletServiceFacade;
     }
 
     private int getUserChoice() {
@@ -43,7 +39,6 @@ public class UserInputHandler {
         scanner.nextLine();
         return choice;
     }
-
 
 
     public void start() {
@@ -110,13 +105,12 @@ public class UserInputHandler {
         System.out.print("Введите пароль: ");
         String password = scanner.nextLine();
 
-        Optional<Player> player = playerService.registerPlayer(username, password, Player.Role.USER);
+        Optional<Player> player = walletServiceFacade.registerPlayer(username, password);
         if (player.isPresent()) {
             System.out.println("Игрок успешно зарегистрирован.");
         } else {
             System.out.println("Ошибка регистрации. Игрок с таким именем уже существует.");
         }
-
     }
 
     private void authorizePlayer() {
@@ -125,23 +119,19 @@ public class UserInputHandler {
         System.out.print("Введите пароль: ");
         String password = scanner.nextLine();
 
-        Player authorizedPlayer = playerService.authorizePlayer(username, password);
+        Player authorizedPlayer = walletServiceFacade.authorizePlayer(username, password);
         if (authorizedPlayer != null) {
             currentPlayer = authorizedPlayer;
-            auditService.recordAction(currentPlayer.getId(), Audit.ActionType.LOGIN);
             System.out.println("Игрок " + currentPlayer.getUsername() + " успешно авторизован.");
             handleAuthorizedActions();
-
         } else {
             System.out.println("Авторизация не удалась. Неправильное имя пользователя или пароль.");
-
-            auditService.recordAction(null, Audit.ActionType.LOGIN_FAILED);
         }
     }
 
     private void viewBalance() {
         if (currentPlayer != null) {
-            BigDecimal balance = playerService.getPlayerBalance(currentPlayer.getId());
+            BigDecimal balance = walletServiceFacade.getPlayerBalance(currentPlayer.getId());
             System.out.println("Баланс игрока " + currentPlayer.getUsername() + ": " + balance);
         } else {
             System.out.println("Пожалуйста, авторизуйтесь для просмотра баланса.");
@@ -160,14 +150,12 @@ public class UserInputHandler {
             } catch (IllegalArgumentException e) {
                 attemptCount++; // Увеличиваем счетчик попыток
                 if (attemptCount < MAX_ATTEMPTS) {
-                    System.out.println("Введен неверный формат UUID. У вас осталось " +
-                            (MAX_ATTEMPTS - attemptCount) + " попыток.");
+                    System.out.println("Введен неверный формат UUID. У вас осталось " + (MAX_ATTEMPTS - attemptCount) + " попыток.");
                 } else {
                     System.out.println("Введен неверный формат UUID. Превышено количество попыток.");
                 }
             }
         }
-
         return null;
     }
 
@@ -179,11 +167,11 @@ public class UserInputHandler {
 
             UUID transactionId = requestTransactionId();
             if (transactionId != null) {
-                if (transactionService.credit(currentPlayer, amount, transactionId)) {
+                try {
+                    walletServiceFacade.credit(currentPlayer, amount, transactionId);
                     System.out.println("Сумма успешно зачислена на ваш счет.");
-                    auditService.recordAction(currentPlayer.getId(), Audit.ActionType.CREDIT);
-                } else {
-                    auditService.recordAction(currentPlayer.getId(), Audit.ActionType.CREDIT_FAILED);
+                } catch (TransactionExistsException | InvalidAmountException e) {
+                    System.out.println(e.getMessage());
                 }
             }
         } else {
@@ -199,11 +187,11 @@ public class UserInputHandler {
 
             UUID transactionId = requestTransactionId();
             if (transactionId != null) {
-                if (transactionService.withdraw(currentPlayer, amount, transactionId)) {
+                try {
+                    walletServiceFacade.withdraw(currentPlayer, amount, transactionId);
                     System.out.println("Сумма успешно снята с вашего счета.");
-                    auditService.recordAction(currentPlayer.getId(), Audit.ActionType.WITHDRAW);
-                } else {
-                    auditService.recordAction(currentPlayer.getId(), Audit.ActionType.WITHDRAW_FAILED);
+                } catch (TransactionExistsException | InvalidAmountException e) {
+                    System.out.println(e.getMessage());
                 }
             }
         } else {
@@ -212,7 +200,7 @@ public class UserInputHandler {
     }
 
     private void viewAudit() {
-        List<Audit> audits = auditService.getRecords();
+        List<Audit> audits = walletServiceFacade.getRecords();
         for (Audit audit : audits) {
             System.out.println(audit);
         }
@@ -220,7 +208,7 @@ public class UserInputHandler {
 
     private void logout() {
         if (currentPlayer != null) {
-            auditService.recordAction(currentPlayer.getId(), Audit.ActionType.LOGOUT);
+            walletServiceFacade.logout(currentPlayer.getId());
             currentPlayer = null;
             System.out.println("Вы успешно вышли из системы.");
         } else {
