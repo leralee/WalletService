@@ -2,14 +2,19 @@ package org.example.model;
 
 import java.time.LocalDateTime;
 
-
+/**
+ * Класс представляющий собой запись аудита. Используется для отслеживания
+ * различных действий, связанных с игроками в системе.
+ */
 public class Audit {
 
     private final Long playerId;
     private final ActionType actionType;
     private final LocalDateTime timestamp;
 
-
+    /**
+     * Перечисление возможных типов действий, которые могут быть зафиксированы в записи аудита.
+     */
     public enum ActionType {
         LOGIN,
         LOGIN_FAILED,
@@ -22,24 +27,45 @@ public class Audit {
         REGISTRATION_FAILED
     }
 
+    /**
+     * Создает новую запись аудита.
+     *
+     * @param playerId Идентификатор игрока, выполнившего действие.
+     * @param actionType Тип действия.
+     * @param timestamp Временная метка, когда было выполнено действие.
+     */
     public Audit(long playerId, ActionType actionType, LocalDateTime timestamp) {
         this.playerId = playerId;
         this.actionType = actionType;
         this.timestamp = timestamp;
     }
 
+    /**
+     * @return Идентификатор игрока, связанного с этой записью аудита.
+     */
     public long getPlayerId() {
         return playerId;
     }
 
+    /**
+     * @return Тип действия, связанный с этой записью аудита.
+     */
     public ActionType getActionType() {
         return actionType;
     }
 
+    /**
+     * @return Временная метка, связанная с этой записью аудита.
+     */
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
 
+    /**
+     * Представляет объект в виде строки.
+     *
+     * @return Строковое представление объекта.
+     */
     @Override
     public String toString() {
         return "Audit{" +

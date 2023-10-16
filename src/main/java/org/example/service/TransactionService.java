@@ -8,8 +8,6 @@ import org.example.model.Player;
 import org.example.model.Transaction;
 import org.example.model.Transaction.TransactionType;
 
-import org.example.repository.TransactionRepository;
-
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -24,8 +22,7 @@ public class TransactionService {
     private final AuditService auditService;
 
 
-    public TransactionService(ITransactionRepository transactionRepository, PlayerService playerService,
-                              AuditService auditService) {
+    public TransactionService(ITransactionRepository transactionRepository, PlayerService playerService, AuditService auditService) {
         this.transactionRepository = transactionRepository;
         this.playerService = playerService;
         this.auditService = auditService;
@@ -40,8 +37,7 @@ public class TransactionService {
      * @param transactionId Уникальный идентификатор транзакции.
      * @return true, если операция прошла успешно, иначе - false.
      */
-    public void credit(Player player, BigDecimal amount, UUID transactionId)
-            throws TransactionExistsException, InvalidAmountException {
+    public void credit(Player player, BigDecimal amount, UUID transactionId) throws TransactionExistsException, InvalidAmountException {
         if (transactionRepository.existsById(transactionId)) {
             auditService.recordAction(player.getId(), Audit.ActionType.CREDIT_FAILED);
             throw new TransactionExistsException("Транзакция с данным ID уже существует.");
@@ -70,8 +66,7 @@ public class TransactionService {
      * @param transactionId Идентификатор транзакции.
      * @return true, если транзакция прошла успешно, иначе - false.
      */
-    public void withdraw(Player player, BigDecimal amount, UUID transactionId) throws
-            TransactionExistsException, InvalidAmountException {
+    public void withdraw(Player player, BigDecimal amount, UUID transactionId) throws TransactionExistsException, InvalidAmountException {
 
         checkTransactionIdExists(transactionId, player);
         checkAmountPositive(amount, player);
@@ -86,6 +81,14 @@ public class TransactionService {
         auditService.recordAction(player.getId(), Audit.ActionType.WITHDRAW);
     }
 
+    /**
+     * Проверяет наличие транзакции с данным ID в репозитории транзакций.
+     * Если такая транзакция уже существует, записывает неудачную операцию в историю и выбрасывает исключение.
+     *
+     * @param transactionId Уникальный идентификатор транзакции для проверки.
+     * @param player Игрок, осуществляющий операцию.
+     * @throws TransactionExistsException если транзакция с данным ID уже существует.
+     */
     private void checkTransactionIdExists(UUID transactionId, Player player) throws TransactionExistsException {
         if (transactionRepository.existsById(transactionId)) {
             auditService.recordAction(player.getId(), Audit.ActionType.WITHDRAW_FAILED);
@@ -93,6 +96,14 @@ public class TransactionService {
         }
     }
 
+    /**
+     * Проверяет, является ли указанная сумма положительной.
+     * Если сумма не положительная, записывает неудачную операцию в историю и выбрасывает исключение.
+     *
+     * @param amount Сумма для проверки.
+     * @param player Игрок, осуществляющий операцию.
+     * @throws InvalidAmountException если указанная сумма не положительная.
+     */
     private void checkAmountPositive(BigDecimal amount, Player player) throws InvalidAmountException {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             auditService.recordAction(player.getId(), Audit.ActionType.WITHDRAW_FAILED);
@@ -100,15 +111,18 @@ public class TransactionService {
         }
     }
 
+    /**
+     * Проверяет, достаточно ли средств на балансе игрока для осуществления операции.
+     * Если средств недостаточно, записывает неудачную операцию в историю и выбрасывает исключение.
+     *
+     * @param player Игрок, осуществляющий операцию.
+     * @param amount Требуемая сумма для сравнения с балансом.
+     * @throws InvalidAmountException если на балансе игрока недостаточно средств.
+     */
     private void checkSufficientBalance(Player player, BigDecimal amount) throws InvalidAmountException {
         if (player.getBalance().compareTo(amount) < 0) {
             auditService.recordAction(player.getId(), Audit.ActionType.WITHDRAW_FAILED);
             throw new InvalidAmountException("На вашем счету недастаточно средств");
         }
     }
-
-
-
-
-
 }

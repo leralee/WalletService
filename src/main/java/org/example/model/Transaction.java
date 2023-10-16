@@ -5,6 +5,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 
+/**
+ * Класс, представляющий собой транзакцию в системе. Содержит информацию о транзакции,
+ * такую как идентификатор транзакции, идентификатор игрока, сумма транзакции,
+ * тип транзакции и временной штамп транзакции.
+ */
 public class Transaction {
     private UUID transactionId;
     private long playerId;
@@ -12,11 +17,22 @@ public class Transaction {
     private TransactionType transactionType;
     private LocalDateTime timestamp;
 
+    /**
+     * Перечисление возможных типов транзакций.
+     */
     public enum TransactionType {
         DEBIT,
         CREDIT
     }
 
+    /**
+     * Конструктор для создания новой транзакции.
+     *
+     * @param playerId Идентификатор игрока.
+     * @param transactionType Тип транзакции (DEBIT или CREDIT).
+     * @param amount Сумма транзакции.
+     * @param transactionId Уникальный идентификатор транзакции.
+     */
     public Transaction(long playerId, TransactionType transactionType, BigDecimal amount, UUID transactionId) {
         this.transactionId = transactionId;
         this.playerId = playerId;
@@ -25,29 +41,18 @@ public class Transaction {
         this.timestamp = LocalDateTime.now();
     }
 
+    /**
+     * @return Уникальный идентификатор транзакции.
+     */
     public UUID getTransactionId() {
         return transactionId;
     }
 
-
-    public long getPlayerId() {
-        return playerId;
-    }
-
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public TransactionType getTransactionType() {
-        return transactionType;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-
+    /**
+     * Представляет объект транзакции в виде строки.
+     *
+     * @return Строковое представление транзакции.
+     */
     @Override
     public String toString() {
         return "Transaction{" +

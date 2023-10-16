@@ -94,9 +94,4 @@ public class PlayerService {
         player.setBalance(newBalance);
         playerRepository.save(player);
     }
-
-    public void logout(Player currentPlayer) {
-        auditService.recordAction(currentPlayer.getId(), Audit.ActionType.LOGOUT);
-    }
-
 }
