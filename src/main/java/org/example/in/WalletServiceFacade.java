@@ -1,5 +1,7 @@
 package org.example.in;
 
+import org.example.exception.InvalidAmountException;
+import org.example.exception.TransactionExistsException;
 import org.example.model.Audit;
 import org.example.model.Player;
 import org.example.service.AuditService;
@@ -37,12 +39,12 @@ public class WalletServiceFacade {
     }
 
     public void credit(Player player, BigDecimal amount, UUID transactionId) throws
-            TransactionService.InvalidAmountException, TransactionService.TransactionExistsException {
+            InvalidAmountException, TransactionExistsException {
         transactionService.credit(player, amount, transactionId);
     }
 
     public void withdraw(Player player, BigDecimal amount, UUID transactionId)
-            throws TransactionService.InvalidAmountException, TransactionService.TransactionExistsException {
+            throws InvalidAmountException, TransactionExistsException {
         transactionService.withdraw(player, amount, transactionId);
     }
 

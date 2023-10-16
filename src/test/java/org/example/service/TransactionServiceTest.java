@@ -1,5 +1,7 @@
 package org.example.service;
 
+import org.example.exception.InvalidAmountException;
+import org.example.exception.TransactionExistsException;
 import org.example.model.Audit;
 import org.example.model.Player;
 import org.example.repository.TransactionRepository;
@@ -56,7 +58,7 @@ public class TransactionServiceTest {
         when(transactionRepository.existsById(transactionId)).thenReturn(true);
 
         assertThatThrownBy(() -> transactionService.withdraw(player, BigDecimal.TEN, transactionId))
-                .isInstanceOf(TransactionService.TransactionExistsException.class);
+                .isInstanceOf(TransactionExistsException.class);
 
         verify(playerService, never()).updateBalance(any(Player.class), any(BigDecimal.class));
         verify(auditService).recordAction(anyLong(), eq(Audit.ActionType.WITHDRAW_FAILED));
@@ -71,7 +73,7 @@ public class TransactionServiceTest {
         when(transactionRepository.existsById(transactionId)).thenReturn(true);
 
         assertThatThrownBy(() -> transactionService.credit(player, BigDecimal.TEN, transactionId))
-                .isInstanceOf(TransactionService.TransactionExistsException.class);
+                .isInstanceOf(TransactionExistsException.class);
 
 
         verify(auditService, times(1)).recordAction(player.getId(), Audit.ActionType.CREDIT_FAILED);
@@ -87,7 +89,7 @@ public class TransactionServiceTest {
         when(transactionRepository.existsById(transactionId)).thenReturn(false);
 
         assertThatThrownBy(() -> transactionService.credit(player, BigDecimal.ZERO, transactionId))
-                .isInstanceOf(TransactionService.InvalidAmountException.class);
+                .isInstanceOf(InvalidAmountException.class);
     }
 
     @Test
@@ -100,7 +102,7 @@ public class TransactionServiceTest {
         when(transactionRepository.existsById(transactionId)).thenReturn(false);
 
         assertThatThrownBy(() -> transactionService.withdraw(player, BigDecimal.valueOf(50), transactionId))
-                .isInstanceOf(TransactionService.InvalidAmountException.class);
+                .isInstanceOf(InvalidAmountException.class);
 
         verify(playerService, never()).updateBalance(any(Player.class), any(BigDecimal.class));
         verify(auditService).recordAction(anyLong(), eq(Audit.ActionType.WITHDRAW_FAILED));
@@ -116,7 +118,7 @@ public class TransactionServiceTest {
         when(transactionRepository.existsById(transactionId)).thenReturn(false);
 
         assertThatThrownBy(() -> transactionService.withdraw(player, BigDecimal.valueOf(-10), transactionId))
-                .isInstanceOf(TransactionService.InvalidAmountException.class);
+                .isInstanceOf(InvalidAmountException.class);
 
         verify(playerService, never()).updateBalance(any(Player.class), any(BigDecimal.class));
         verify(auditService).recordAction(anyLong(), eq(Audit.ActionType.WITHDRAW_FAILED));

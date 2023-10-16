@@ -1,5 +1,7 @@
 package org.example.service;
 
+import org.example.exception.InvalidAmountException;
+import org.example.exception.TransactionExistsException;
 import org.example.interfaces.ITransactionRepository;
 import org.example.model.Audit;
 import org.example.model.Player;
@@ -105,16 +107,8 @@ public class TransactionService {
         }
     }
 
-    public class TransactionExistsException extends Exception {
-        public TransactionExistsException(String message) {
-            super(message);
-        }
-    }
 
-    public class InvalidAmountException extends Exception {
-        public InvalidAmountException(String message) {
-            super(message);
-        }
-    }
+
+
 
 }
