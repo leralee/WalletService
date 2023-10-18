@@ -43,7 +43,7 @@ public class PlayerServiceTest {
         assertThat(player).isPresent();
         assertThat(player.get().getUsername()).isEqualTo("John");
 
-        verify(auditService).recordAction(1L, Audit.ActionType.REGISTRATION_SUCCESS);
+        verify(auditService).recordAction(eq(1L), eq(Audit.ActionType.REGISTRATION_SUCCESS));
     }
 
     @Test

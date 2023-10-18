@@ -7,6 +7,7 @@ import org.example.interfaces.IPlayerRepository;
 import org.example.interfaces.ITransactionRepository;
 import org.example.model.Player;
 import org.example.repository.AuditRepository;
+import org.example.repository.DatabaseConnection;
 import org.example.repository.PlayerRepository;
 import org.example.repository.TransactionRepository;
 import org.example.service.AuditService;
@@ -27,6 +28,8 @@ public class Main {
      * @param args аргументы командной строки.
      */
     public static void main(String[] args) {
+        DatabaseConnection.migrationSetUp();
+
         IPlayerRepository playerRepository = new PlayerRepository();
         ITransactionRepository transactionRepository = new TransactionRepository();
         IAuditRepository auditRepository = new AuditRepository();
@@ -37,11 +40,11 @@ public class Main {
         TransactionService transactionService = new TransactionService(transactionRepository,
                 playerService, auditService);
 
-        playerService.registerPlayer("admin", "admin", Player.Role.ADMIN);
-
         WalletServiceFacade walletServiceFacade = new WalletServiceFacade(playerService, transactionService, auditService);
 
         WalletServiceHandler userInputHandler = new WalletServiceHandler(walletServiceFacade);
         userInputHandler.start();
+
+
     }
 }

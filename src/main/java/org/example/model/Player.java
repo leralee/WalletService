@@ -8,10 +8,10 @@ import java.math.BigDecimal;
  */
 public class Player {
     private Long id;
-    private Role role;
+    private Role role = Role.USER;
     private String username;
     private String password;
-    private BigDecimal balance;
+    private BigDecimal balance = BigDecimal.ZERO;
 
     /**
      * Перечисление возможных ролей игроков в системе.

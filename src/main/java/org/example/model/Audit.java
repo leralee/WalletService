@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
  */
 public class Audit {
 
-    private final Long playerId;
-    private final ActionType actionType;
-    private final LocalDateTime timestamp;
+    private Long playerId;
+    private ActionType actionType;
+    private LocalDateTime timestamp;
 
     /**
      * Перечисление возможных типов действий, которые могут быть зафиксированы в записи аудита.
@@ -34,16 +34,19 @@ public class Audit {
      * @param actionType Тип действия.
      * @param timestamp Временная метка, когда было выполнено действие.
      */
-    public Audit(long playerId, ActionType actionType, LocalDateTime timestamp) {
+    public Audit(Long playerId, ActionType actionType, LocalDateTime timestamp) {
         this.playerId = playerId;
         this.actionType = actionType;
         this.timestamp = timestamp;
     }
 
+    public Audit() {
+    }
+
     /**
      * @return Идентификатор игрока, связанного с этой записью аудита.
      */
-    public long getPlayerId() {
+    public Long getPlayerId() {
         return playerId;
     }
 
@@ -59,6 +62,33 @@ public class Audit {
      */
     public LocalDateTime getTimestamp() {
         return timestamp;
+    }
+
+    /**
+     * Устанавливает идентификатор игрока.
+     *
+     * @param playerId Идентификатор игрока.
+     */
+    public void setPlayerId(Long playerId) {
+        this.playerId = playerId;
+    }
+
+    /**
+     * Устанавливает тип действия.
+     *
+     * @param actionType Тип действия.
+     */
+    public void setActionType(ActionType actionType) {
+        this.actionType = actionType;
+    }
+
+    /**
+     * Устанавливает временную метку.
+     *
+     * @param timestamp Временная метка действия.
+     */
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 
     /**

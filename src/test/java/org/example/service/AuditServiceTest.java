@@ -15,7 +15,6 @@ import java.util.Objects;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-
 public class AuditServiceTest {
 
     private AuditRepository auditRepository;

@@ -41,7 +41,7 @@ public class PlayerService {
         Player player = new Player();
         player.setUsername(username);
         player.setPassword(hashedPassword);
-        player.setBalance(BigDecimal.valueOf(0.0));
+        player.setBalance(BigDecimal.ZERO);
         player.setRole(role);
 
         playerRepository.save(player);

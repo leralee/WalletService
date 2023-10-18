@@ -30,14 +30,21 @@ public class TransactionService {
 
 
     /**
-     * Выполняет операцию пополнения баланса игрока.
+     * Зачисляет указанную сумму на счет игрока.
+     * <p>
+     * Если транзакция с указанным ID уже существует или предоставленная сумма недействительна,
+     * выполняется запись неудачного зачисления в аудит и выбрасывается соответствующее исключение.
+     * </p>
      *
-     * @param player        Игрок, чей баланс нужно пополнить.
-     * @param amount        Сумма для пополнения.
+     * @param player        Игрок, со счета которого производится пополнеие.
+     * @param amount        Сумма для зачисления.
      * @param transactionId Уникальный идентификатор транзакции.
-     * @return true, если операция прошла успешно, иначе - false.
+     *
+     * @throws TransactionExistsException Если транзакция с указанным ID уже существует.
+     * @throws InvalidAmountException     Если предоставленная сумма недействительна (<= 0).
      */
-    public void credit(Player player, BigDecimal amount, UUID transactionId) throws TransactionExistsException, InvalidAmountException {
+    public void credit(Player player, BigDecimal amount, UUID transactionId)
+            throws TransactionExistsException, InvalidAmountException {
         if (transactionRepository.existsById(transactionId)) {
             auditService.recordAction(player.getId(), Audit.ActionType.CREDIT_FAILED);
             throw new TransactionExistsException("Транзакция с данным ID уже существует.");
@@ -55,19 +62,24 @@ public class TransactionService {
         transactionRepository.addTransaction(transaction);
 
         auditService.recordAction(player.getId(), Audit.ActionType.CREDIT);
-
     }
 
     /**
-     * Списывает заданную сумму с баланса игрока.
+     * Снимает указанную сумму со счета игрока.
+     * <p>
+     * Если транзакция с указанным ID уже существует или недостаточно баланса игрока,
+     * выполняется запись неудачного зачисления в аудит и выбрасывается соответствующее исключение.
+     * </p>
      *
-     * @param player        Объект игрока, с чьего баланса будет списана сумма.
-     * @param amount        Сумма для списания.
-     * @param transactionId Идентификатор транзакции.
-     * @return true, если транзакция прошла успешно, иначе - false.
+     * @param player        Игрок, со счета которого производится снятие.
+     * @param amount        Сумма для снятия.
+     * @param transactionId Уникальный идентификатор транзакции.
+     *
+     * @throws TransactionExistsException Если транзакция с указанным ID уже существует.
+     * @throws InvalidAmountException     Если предоставленная сумма недействительна (<= 0) или баланс игрока недостаточен.
      */
-    public void withdraw(Player player, BigDecimal amount, UUID transactionId) throws TransactionExistsException, InvalidAmountException {
-
+    public void withdraw(Player player, BigDecimal amount, UUID transactionId)
+            throws TransactionExistsException, InvalidAmountException {
         checkTransactionIdExists(transactionId, player);
         checkAmountPositive(amount, player);
         checkSufficientBalance(player, amount);

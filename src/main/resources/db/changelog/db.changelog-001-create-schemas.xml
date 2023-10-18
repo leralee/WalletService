@@ -1,0 +1,18 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="create-wallet-schema" author="Valeria">
+        <sql>
+            CREATE SCHEMA wallet;
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-migration-schema" author="Valeria">
+        <sql>
+            CREATE SCHEMA migration;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
