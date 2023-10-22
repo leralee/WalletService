@@ -40,13 +40,13 @@ public class AuditRepository implements IAuditRepository {
     public List<Audit> getAllRecords() {
         String query = "SELECT * FROM wallet.audit";
         List<Audit> records = new ArrayList<>();
-        ResultSet resultSet = null;
+        ResultSet resultSet;
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 Audit audit = new Audit();
-                audit.setPlayerId(resultSet.getLong("player_id"));
+                audit.setPlayerId(resultSet.getObject("player_id", Long.class));
                 audit.setActionType(Audit.ActionType.valueOf(resultSet.getString("action_type")));
                 audit.setTimestamp(resultSet.getTimestamp("timestamp").toLocalDateTime());
                 records.add(audit);

@@ -6,13 +6,15 @@
 
     <changeSet id="1" author="your_name">
         <sql>
-            INSERT INTO wallet.player (role, username, password, balance) VALUES ('ADMIN', 'admin', '$2a$10$FxOrLsO.BHQYPR7uk6zEdOHsLlPrSddpKmuqkx8E6ZHmAHnrceqNq', 0.0);
+            INSERT INTO wallet.player (role, username, password, balance)
+            VALUES ('ADMIN', 'admin', '$2a$10$FxOrLsO.BHQYPR7uk6zEdOHsLlPrSddpKmuqkx8E6ZHmAHnrceqNq', 0.0);
         </sql>
     </changeSet>
 
     <changeSet id="2" author="your_name">
         <sql>
-            INSERT INTO wallet.player (role, username, password, balance) VALUES ('USER', 'Alice', '$2a$10$fHTQj3P9bVXsyP5VJmrtHeUMCJIemzo88Skt5D3QbXfiTLhFIonc2', 150000);
+            INSERT INTO wallet.player (role, username, password, balance)
+            VALUES ('USER', 'Alice', '$2a$10$fHTQj3P9bVXsyP5VJmrtHeUMCJIemzo88Skt5D3QbXfiTLhFIonc2', 150000);
         </sql>
     </changeSet>
 

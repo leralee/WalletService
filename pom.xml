@@ -26,11 +26,42 @@
         <artifactId>liquibase-maven-plugin</artifactId>
         <version>4.24.0</version>
         <configuration>
-          <propertyFile>src/main/resources/liquibase.properties</propertyFile>
+          <propertyFile>liquibase.properties</propertyFile>
+<!--          <url>jdbc:postgresql://localhost:5432/wallet_service_db</url>-->
+<!--          <username>valeriali</username>-->
+<!--          <password>postgres</password>-->
+<!--          <changeLogFile>db/changelog/master.xml</changeLogFile>-->
+<!--          <defaultSchemaName>migration</defaultSchemaName>-->
         </configuration>
       </plugin>
 
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>org.example.Main</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+
     </plugins>
+
 
   </build>
 

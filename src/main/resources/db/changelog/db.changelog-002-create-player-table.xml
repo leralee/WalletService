@@ -6,8 +6,11 @@
 
 
     <changeSet id="create-player-table" author="Valeria">
+
+        <createSequence sequenceName="player_id_seq" schemaName="wallet" startValue="1" incrementBy="1"/>
+
         <createTable tableName="player" schemaName="wallet">
-            <column name="id" type="BIGSERIAL" autoIncrement="true">
+            <column name="id" type="BIGINT" defaultValueSequenceNext="wallet.player_id_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="role" type="VARCHAR(255)">

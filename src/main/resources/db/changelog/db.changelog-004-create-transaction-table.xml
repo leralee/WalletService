@@ -5,8 +5,11 @@
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <changeSet id="create-transaction-table" author="Valeria">
+
+        <createSequence sequenceName="transaction_id_seq" schemaName="wallet" startValue="1" incrementBy="1"/>
+
         <createTable tableName="transaction" schemaName="wallet">
-            <column name="id" type="SERIAL">
+            <column name="id" type="BIGINT" defaultValueSequenceNext="wallet.transaction_id_seq">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="transaction_id" type="UUID">

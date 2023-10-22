@@ -14,6 +14,8 @@ import org.example.service.AuditService;
 import org.example.service.PlayerService;
 import org.example.service.TransactionService;
 
+import java.sql.SQLException;
+
 /**
  * Главный класс приложения, отвечающий за инициализацию сервисов и старт пользовательского интерфейса.
  */
@@ -27,8 +29,9 @@ public class Main {
      *
      * @param args аргументы командной строки.
      */
-    public static void main(String[] args) {
-        DatabaseConnection.migrationSetUp();
+    public static void main(String[] args) throws SQLException, ClassNotFoundException {
+
+        DatabaseConnection.getConnection();
 
         IPlayerRepository playerRepository = new PlayerRepository();
         ITransactionRepository transactionRepository = new TransactionRepository();

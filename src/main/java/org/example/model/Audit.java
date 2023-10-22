@@ -1,6 +1,7 @@
 package org.example.model;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Класс представляющий собой запись аудита. Используется для отслеживания
@@ -89,6 +90,19 @@ public class Audit {
      */
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Audit audit = (Audit) o;
+        return Objects.equals(playerId, audit.playerId) && actionType == audit.actionType && Objects.equals(timestamp, audit.timestamp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(playerId, actionType, timestamp);
     }
 
     /**

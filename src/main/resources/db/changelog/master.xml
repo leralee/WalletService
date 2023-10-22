@@ -9,5 +9,6 @@
     <include file="db.changelog-003-create-audit-table.xml" relativeToChangelogFile="true"/>
     <include file="db.changelog-004-create-transaction-table.xml" relativeToChangelogFile="true"/>
     <include file="db.changelog-005-fill-some-values-in-player-table.xml" relativeToChangelogFile="true"/>
+    <include file="db.changelog-006-move-liquibase-tables-to-migration.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>
