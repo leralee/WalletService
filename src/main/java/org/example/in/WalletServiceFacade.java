@@ -113,7 +113,4 @@ public class WalletServiceFacade {
      *
      * @param id Идентификатор игрока, который вышел из системы.
      */
-    public void logout(Long id) {
-        auditService.recordAction(id, Audit.ActionType.LOGOUT);
-    }
 }

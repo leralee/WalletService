@@ -1,9 +1,7 @@
 package org.example.service;
 
 import org.example.interfaces.IPlayerRepository;
-import org.example.model.Audit;
 import org.example.model.Player;
-import org.example.repository.PlayerRepository;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.math.BigDecimal;
@@ -34,7 +32,6 @@ public class PlayerService {
      */
     public Optional<Player> registerPlayer(String username, String password, Player.Role role) {
         if (playerRepository.findByName(username).isPresent()) {
-            auditService.recordAction(-1L, Audit.ActionType.REGISTRATION_FAILED);
             return Optional.empty();
         }
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
@@ -45,8 +42,6 @@ public class PlayerService {
         player.setRole(role);
 
         playerRepository.save(player);
-
-        auditService.recordAction(player.getId(), Audit.ActionType.REGISTRATION_SUCCESS);
 
         return Optional.of(player);
 
@@ -60,16 +55,9 @@ public class PlayerService {
      * @return Объект игрока, если авторизация прошла успешно, иначе - null.
      */
     public Player authorizePlayer(String username, String password) {
-        Player authorizedPlayer = playerRepository.findByName(username)
+        return playerRepository.findByName(username)
                 .filter(player -> BCrypt.checkpw(password, player.getPassword()))
                 .orElse(null);
-        if (authorizedPlayer != null) {
-            auditService.recordAction(authorizedPlayer.getId(), Audit.ActionType.LOGIN);
-        } else {
-            auditService.recordAction(null, Audit.ActionType.LOGIN_FAILED);
-        }
-
-        return authorizedPlayer;
     }
 
     /**

@@ -5,7 +5,7 @@
   <groupId>org.example</groupId>
   <artifactId>walletService</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>war</packaging>
 
   <name>walletService</name>
   <url>http://maven.apache.org</url>
@@ -27,41 +27,39 @@
         <version>4.24.0</version>
         <configuration>
           <propertyFile>liquibase.properties</propertyFile>
-<!--          <url>jdbc:postgresql://localhost:5432/wallet_service_db</url>-->
-<!--          <username>valeriali</username>-->
-<!--          <password>postgres</password>-->
-<!--          <changeLogFile>db/changelog/master.xml</changeLogFile>-->
-<!--          <defaultSchemaName>migration</defaultSchemaName>-->
         </configuration>
       </plugin>
 
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.3.0</version>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>3.4.0</version>
         <configuration>
-          <archive>
-            <manifest>
-              <mainClass>org.example.Main</mainClass>
-            </manifest>
-          </archive>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>aspectj-maven-plugin</artifactId>
+        <version>1.14.0</version>
+        <configuration>
+          <showWeaveInfo>true</showWeaveInfo>
+          <source>1.8</source>
+          <target>1.8</target>
+          <complianceLevel>1.8</complianceLevel>
         </configuration>
         <executions>
           <execution>
-            <id>make-assembly</id>
-            <phase>package</phase>
             <goals>
-              <goal>single</goal>
+              <goal>compile</goal>
+              <goal>test-compile</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
 
-
     </plugins>
-
 
   </build>
 
@@ -71,6 +69,7 @@
     <maven.compiler.target>17</maven.compiler.target>
     <junit-jupiter.version>5.8.0</junit-jupiter.version>
     <testcontainers>1.19.1</testcontainers>
+    <aspectJ>1.9.7</aspectJ>
   </properties>
 
   <dependencies>
@@ -146,6 +145,62 @@
       <version>${testcontainers}</version>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>4.0.1</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.15.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct</artifactId>
+      <version>1.5.5.Final</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct-processor</artifactId>
+      <version>1.5.5.Final</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.21.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.auth0</groupId>
+      <artifactId>java-jwt</artifactId>
+      <version>4.4.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+      <version>2.13.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjrt</artifactId>
+      <version>${aspectJ}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjweaver</artifactId>
+      <version>${aspectJ}</version>
+    </dependency>
+
 
   </dependencies>
 

@@ -22,7 +22,6 @@ public class DatabaseConnection {
             env = "local";
         }
         String propertiesFile = "db-" + env + ".properties";
-        System.out.println(propertiesFile + "!!!!!!!!!!!!");
 
         try {
             properties.load(DatabaseConnection.class.getClassLoader().getResourceAsStream(propertiesFile));

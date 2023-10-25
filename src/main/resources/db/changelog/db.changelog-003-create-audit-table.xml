@@ -4,13 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <changeSet id="create-audit-table" author="Valeria">
-
-        <createSequence sequenceName="audit_id_seq" schemaName="wallet" startValue="1" incrementBy="1"/>
-
         <createTable tableName="audit" schemaName="wallet">
-            <column name="id" type="BIGINT" defaultValueSequenceNext="wallet.audit_id_seq">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
             <column name="player_id" type="BIGINT">
                 <constraints nullable="true"/>
             </column>
@@ -28,5 +22,15 @@
                              referencedColumnNames="id"
                              referencedTableSchemaName="wallet"
                              constraintName="fk_audit_player_id"/>
+    </changeSet>
+
+    <changeSet id="create-audit-id-sequence" author="Valeria">
+        <createSequence sequenceName="audit_id_seq" schemaName="wallet" startValue="1" incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="add-id-column-to-audit-table" author="Valeria">
+        <sql>
+            ALTER TABLE wallet.audit ADD id BIGINT DEFAULT nextval('wallet.audit_id_seq') NOT NULL PRIMARY KEY;
+        </sql>
     </changeSet>
 </databaseChangeLog>

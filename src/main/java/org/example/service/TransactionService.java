@@ -3,7 +3,6 @@ package org.example.service;
 import org.example.exception.InvalidAmountException;
 import org.example.exception.TransactionExistsException;
 import org.example.interfaces.ITransactionRepository;
-import org.example.model.Audit;
 import org.example.model.Player;
 import org.example.model.Transaction;
 import org.example.model.Transaction.TransactionType;
@@ -46,22 +45,18 @@ public class TransactionService {
     public void credit(Player player, BigDecimal amount, UUID transactionId)
             throws TransactionExistsException, InvalidAmountException {
         if (transactionRepository.existsById(transactionId)) {
-            auditService.recordAction(player.getId(), Audit.ActionType.CREDIT_FAILED);
             throw new TransactionExistsException("Транзакция с данным ID уже существует.");
         }
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            auditService.recordAction(player.getId(), Audit.ActionType.CREDIT_FAILED);
             throw new InvalidAmountException("Сумма должна быть положительной.");
         }
 
         BigDecimal updatedBalance = player.getBalance().add(amount);
         playerService.updateBalance(player, updatedBalance);
 
-        Transaction transaction = new Transaction(player.getId(), TransactionType.DEBIT, amount, transactionId);
+        Transaction transaction = new Transaction(player.getId(), TransactionType.CREDIT, amount, transactionId);
         transactionRepository.addTransaction(transaction);
-
-        auditService.recordAction(player.getId(), Audit.ActionType.CREDIT);
     }
 
     /**
@@ -87,10 +82,8 @@ public class TransactionService {
         BigDecimal updatedBalance = player.getBalance().subtract(amount);
         playerService.updateBalance(player, updatedBalance);
 
-        Transaction transaction = new Transaction(player.getId(), TransactionType.CREDIT, amount, transactionId);
+        Transaction transaction = new Transaction(player.getId(), TransactionType.DEBIT, amount, transactionId);
         transactionRepository.addTransaction(transaction);
-
-        auditService.recordAction(player.getId(), Audit.ActionType.WITHDRAW);
     }
 
     /**
@@ -103,7 +96,6 @@ public class TransactionService {
      */
     private void checkTransactionIdExists(UUID transactionId, Player player) throws TransactionExistsException {
         if (transactionRepository.existsById(transactionId)) {
-            auditService.recordAction(player.getId(), Audit.ActionType.WITHDRAW_FAILED);
             throw new TransactionExistsException("Транзакция с данным ID уже существует.");
         }
     }
@@ -118,7 +110,6 @@ public class TransactionService {
      */
     private void checkAmountPositive(BigDecimal amount, Player player) throws InvalidAmountException {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            auditService.recordAction(player.getId(), Audit.ActionType.WITHDRAW_FAILED);
             throw new InvalidAmountException("Сумма должна быть положительной.");
         }
     }
@@ -133,7 +124,6 @@ public class TransactionService {
      */
     private void checkSufficientBalance(Player player, BigDecimal amount) throws InvalidAmountException {
         if (player.getBalance().compareTo(amount) < 0) {
-            auditService.recordAction(player.getId(), Audit.ActionType.WITHDRAW_FAILED);
             throw new InvalidAmountException("На вашем счету недастаточно средств");
         }
     }

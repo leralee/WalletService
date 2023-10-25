@@ -43,7 +43,7 @@ public class PlayerServiceTest {
         assertThat(player).isPresent();
         assertThat(player.get().getUsername()).isEqualTo("John");
 
-        verify(auditService).recordAction(eq(1L), eq(Audit.ActionType.REGISTRATION_SUCCESS));
+//        verify(auditService).recordAction(eq(1L), eq(Audit.ActionType.REGISTRATION_SUCCESS));
     }
 
     @Test
@@ -56,7 +56,7 @@ public class PlayerServiceTest {
         Optional<Player> player = playerService.registerPlayer("John", "pass123",
                 Player.Role.USER);
         assertThat(player).isNotPresent();
-        verify(auditService).recordAction(eq(-1L), eq(Audit.ActionType.REGISTRATION_FAILED));
+//        verify(auditService).recordAction(eq(-1L), eq(Audit.ActionType.REGISTRATION_FAILED));
     }
 
     @Test
