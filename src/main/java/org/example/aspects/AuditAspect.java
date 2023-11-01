@@ -1,124 +1,156 @@
 package org.example.aspects;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
 import org.example.exception.InvalidAmountException;
 import org.example.exception.TransactionExistsException;
 import org.example.model.Audit;
 import org.example.model.Player;
 import org.example.service.AuditService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+/**
+ * Аспект для аудита различных действий в приложении.
+ * <p>
+ * Использует сервис аудита для регистрации действий успешных и неудачных попыток
+ * авторизации, регистрации, пополнения и снятия средств.
+ * </p>
+ */
 @Aspect
+@Component
 public class AuditAspect {
 
-    private final AuditService auditService;
+    private static final Logger logger = LogManager.getLogger(AuditAspect.class);
+    private AuditService auditService;
 
+    /**
+     * Конструктор аспекта аудита с указанием сервиса аудита.
+     *
+     * @param auditService сервис аудита, используемый для записи действий.
+     */
+    @Autowired
     public AuditAspect(AuditService auditService) {
         this.auditService = auditService;
     }
 
-    @Around("execution(* org.example.service.PlayerService.registerPlayer(..))")
-    public Object auditRegisterPlayer(ProceedingJoinPoint joinPoint) throws Throwable {
-        System.out.println("Calling method " + joinPoint.getSignature());
-        long startTime = System.currentTimeMillis();
-
-        Object result = joinPoint.proceed();
-
-        if (result instanceof Optional && !((Optional) result).isPresent()) {
-            auditService.recordAction(-1L, Audit.ActionType.REGISTRATION_FAILED);
-        } else if (result instanceof Player) {
-            Player player = (Player) result;
-            auditService.recordAction(player.getId(), Audit.ActionType.REGISTRATION_SUCCESS);
-        }
-
-        long endTime = System.currentTimeMillis();
-        System.out.println("Execution of method " + joinPoint.getSignature() +
-                " finished. Execution time is " + (endTime - startTime) + " ns");
-
-        return result;
-    }
-
-    @Around("execution(* org.example.service.PlayerService.authorizePlayer(..))")
-    public Object auditAuthorizePlayer(ProceedingJoinPoint joinPoint) throws Throwable {
-        System.out.println("Calling method " + joinPoint.getSignature());
-        long startTime = System.currentTimeMillis();
-
-        Object result = joinPoint.proceed();
-        if (result == null) {
+    /**
+     * Совет "после возвращения", который регистрирует успешную авторизацию игрока.
+     *
+     * @param authorizedPlayer игрок, который был авторизован.
+     */
+    @AfterReturning(pointcut = "execution(* org.example.service.PlayerService.authorizePlayer(..))", returning = "authorizedPlayer")
+    public void afterAuthorization(Player authorizedPlayer) {
+        if (authorizedPlayer != null) {
+            auditService.recordAction(authorizedPlayer.getId(), Audit.ActionType.LOGIN);
+        } else {
             auditService.recordAction(null, Audit.ActionType.LOGIN_FAILED);
-        } else if (result instanceof Player) {
-            Player player = (Player) result;
-            auditService.recordAction(player.getId(), Audit.ActionType.LOGIN);
-        }
-
-        long endTime = System.currentTimeMillis();
-        System.out.println("Execution of method " + joinPoint.getSignature() +
-                " finished. Execution time is " + (endTime - startTime) + " ns");
-
-        return result;
-    }
-
-    @Around("execution(* org.example.service.TransactionService.credit(..))")
-    public Object auditCredit(ProceedingJoinPoint joinPoint) throws Throwable {
-
-
-        try {
-            System.out.println("Calling method " + joinPoint.getSignature());
-            long startTime = System.currentTimeMillis();
-
-            Object result = joinPoint.proceed();
-            Player player = (Player) joinPoint.getArgs()[0];
-            auditService.recordAction(player.getId(), Audit.ActionType.CREDIT);
-
-            long endTime = System.currentTimeMillis();
-            System.out.println("Execution of method " + joinPoint.getSignature() +
-                    " finished. Execution time is " + (endTime - startTime) + " ns");
-
-            return result;
-        } catch (TransactionExistsException ex) {
-            Player player = (Player) joinPoint.getArgs()[0];
-            if ("Транзакция с данным ID уже существует.".equals(ex.getMessage())) {
-                auditService.recordAction(player.getId(), Audit.ActionType.CREDIT_FAILED);
-            } else {
-                auditService.recordAction(player.getId(), Audit.ActionType.CREDIT_FAILED);
-            }
-            throw ex;
-        } catch (InvalidAmountException ex) {
-            Player player = (Player) joinPoint.getArgs()[0];
-            if ("Сумма должна быть положительной.".equals(ex.getMessage())) {
-                auditService.recordAction(player.getId(), Audit.ActionType.CREDIT_FAILED);
-            }
-            throw ex;
         }
     }
 
-    @Around("execution(* org.example.service.TransactionService.withdraw(..))")
-    public Object auditWithdraw(ProceedingJoinPoint joinPoint) throws Throwable {
-        try {
-            System.out.println("Calling method " + joinPoint.getSignature());
-            long startTime = System.currentTimeMillis();
-
-            Object result = joinPoint.proceed();
-            Player player = (Player) joinPoint.getArgs()[0];
-            auditService.recordAction(player.getId(), Audit.ActionType.WITHDRAW);
-
-            long endTime = System.currentTimeMillis();
-            System.out.println("Execution of method " + joinPoint.getSignature() +
-                    " finished. Execution time is " + (endTime - startTime) + " ns");
-
-            return result;
-        } catch (TransactionExistsException ex) {
-            Player player = (Player) joinPoint.getArgs()[0];
-            auditService.recordAction(player.getId(), Audit.ActionType.WITHDRAW_FAILED);
-            throw ex;
+    /**
+     * Совет "после возвращения", который регистрирует результат регистрации игрока.
+     *
+     * @param result Опциональное значение, содержащее нового зарегистрированного игрока,
+     *               или null, если регистрация не удалась.
+     */
+    @AfterReturning(pointcut = "execution(* org.example.service.PlayerService.registerPlayer(..))", returning = "result")
+    public void afterRegisteringPlayer(Optional<Player> result) {
+        if (result.isPresent()) {
+            auditService.recordAction(result.get().getId(), Audit.ActionType.REGISTRATION_SUCCESS);
+        } else {
+            auditService.recordAction(-1L, Audit.ActionType.REGISTRATION_FAILED);
         }
     }
 
+    /**
+     * Совет "после возвращения", который регистрирует успешную транзакцию пополнения.
+     *
+     * @param player игрок, для которого транзакция пополнения была успешной.
+     */
+    @AfterReturning("execution(* org.example.service.TransactionService.credit(..)) && args(player,..)")
+    public void afterSuccessfulCredit(Player player) {
+        auditService.recordAction(player.getId(), Audit.ActionType.CREDIT);
+    }
 
+    /**
+     * Совет "после выброса исключения" для обработки неудачных транзакций пополнения из-за существующей транзакции.
+     *
+     * @param player игрок, пытающийся выполнить транзакцию.
+     * @param ex     исключение, выброшенное, когда транзакция уже существует.
+     */
+    @AfterThrowing(pointcut = "execution(* org.example.service.TransactionService.credit(..)) && args(player,..)", throwing = "ex")
+    public void afterFailedCreditDueToTransactionExists(Player player, TransactionExistsException ex) {
+        auditService.recordAction(player.getId(), Audit.ActionType.CREDIT_FAILED);
+    }
 
+    /**
+     * Совет "после выброса исключения" для обработки неудачных транзакций пополнения из-за неверной суммы.
+     *
+     * @param player игрок, пытающийся выполнить транзакцию.
+     * @param ex     исключение, выброшенное, когда сумма недействительна.
+     */
+    @AfterThrowing(pointcut = "execution(* org.example.service.TransactionService.credit(..)) && args(player,..)", throwing = "ex")
+    public void afterFailedCreditDueToInvalidAmount(Player player, InvalidAmountException ex) {
+        auditService.recordAction(player.getId(), Audit.ActionType.CREDIT_FAILED);
+    }
 
+    /**
+     * Совет "после возвращения", который регистрирует успешную транзакцию снятия средств.
+     *
+     * @param player игрок, для которого транзакция снятия средств была успешной.
+     */
+    @AfterReturning("execution(* org.example.service.TransactionService.withdraw(..)) && args(player,..)")
+    public void afterSuccessfulWithdraw(Player player) {
+        auditService.recordAction(player.getId(), Audit.ActionType.WITHDRAW);
+    }
+
+    /**
+     * Совет "после выброса исключения" для обработки неудачных транзакций снятия из-за существующей транзакции.
+     *
+     * @param player игрок, пытающийся выполнить транзакцию.
+     * @param ex     исключение, выброшенное, когда транзакция уже существует.
+     */
+    @AfterThrowing(pointcut = "execution(* org.example.service.TransactionService.withdraw(..)) && args(player,..)", throwing = "ex")
+    public void afterFailedWithdrawDueToTransactionExists(Player player, TransactionExistsException ex) {
+        auditService.recordAction(player.getId(), Audit.ActionType.WITHDRAW_FAILED);
+    }
+
+    /**
+     * Совет "после выброса исключения" для обработки неудачных транзакций снятия из-за неверной суммы.
+     *
+     * @param player игрок, пытающийся выполнить транзакцию.
+     * @param ex     исключение, выброшенное, когда сумма недействительна.
+     */
+    @AfterThrowing(pointcut = "execution(* org.example.service.TransactionService.withdraw(..)) && args(player,..)", throwing = "ex")
+    public void afterFailedWithdrawDueToInvalidAmount(Player player, InvalidAmountException ex) {
+        auditService.recordAction(player.getId(), Audit.ActionType.WITHDRAW_FAILED);
+    }
+
+    /**
+     * Совет Around, регистрирующий время выполнения метода любого сервиса в пакете org.example.service.
+     * <p>
+     * Данный совет охватывает все методы, определённые в сервисах указанного пакета, и замеряет время,
+     * затраченное на их выполнение. Результаты замера логируются.
+     * </p>
+     *
+     * @param joinPoint сопряжение, представляющее точку выполнения программы, где применяется совет.
+     * @return возвращает объект, который является результатом выполнения оригинального метода.
+     * @throws Throwable исключение, которое может быть выброшено при выполнении метода.
+     */
+    @Around("execution(* org.example.service.*.*(..))")
+    public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
+        long start = System.currentTimeMillis();
+        Object proceed = joinPoint.proceed();
+        long executionTime = System.currentTimeMillis() - start;
+        logger.info("{} выполен за {} ms", joinPoint.getSignature(), executionTime);
+        return proceed;
+    }
 }

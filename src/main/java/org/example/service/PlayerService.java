@@ -3,6 +3,7 @@ package org.example.service;
 import org.example.interfaces.IPlayerRepository;
 import org.example.model.Player;
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -11,6 +12,8 @@ import java.util.Optional;
  * Сервис для управления игроками в приложении Wallet Service.
  * Предоставляет методы для регистрации, авторизации и получения баланса игрока.
  */
+
+@Service
 public class PlayerService {
     private final IPlayerRepository playerRepository;
     private final AuditService auditService;

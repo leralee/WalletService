@@ -7,6 +7,8 @@ import org.example.model.Player;
 import org.example.service.AuditService;
 import org.example.service.PlayerService;
 import org.example.service.TransactionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -20,6 +22,8 @@ import java.util.UUID;
  * такими как сервис игроков, сервис транзакций и сервис аудита.
  * </p>
  */
+
+@Component
 public class WalletServiceFacade {
     private final PlayerService playerService;
     private final TransactionService transactionService;
@@ -32,6 +36,8 @@ public class WalletServiceFacade {
      * @param transactionService Сервис для работы с транзакциями.
      * @param auditService Сервис для аудита операций.
      */
+
+    @Autowired
     public WalletServiceFacade(PlayerService playerService,
                                TransactionService transactionService, AuditService auditService) {
         this.playerService = playerService;

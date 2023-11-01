@@ -4,8 +4,11 @@ package org.example.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
-import org.example.configuration.ConfigurationUtil;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -14,9 +17,12 @@ import java.util.Date;
  * Утилитный класс для работы с JWT-токенами.
  * Отвечает за генерацию и валидацию токенов.
  */
+//@PropertySource("classpath:application.yml")
+@Component
 public class JWTUtil {
 
-    private static final String SECRET_KEY = ConfigurationUtil.get("jwt_secret");
+    @Value("${jwt.secret}")
+    private String SECRET_KEY;
 
     /**
      * Генерирует JWT-токен для указанных имени пользователя и роли.
@@ -43,7 +49,7 @@ public class JWTUtil {
      * @param token JWT-токен, который необходимо проверить.
      * @return true, если токен действителен, иначе false.
      */
-    public static boolean validateToken(String token) {
+    public boolean validateToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
             JWTVerifier verifier = JWT.require(algorithm)
@@ -55,4 +61,12 @@ public class JWTUtil {
             return false;
         }
     }
+
+    public String extractTokenFromHeader(String bearerToken) {
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
+    }
+
 }

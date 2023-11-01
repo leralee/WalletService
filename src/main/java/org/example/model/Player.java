@@ -8,7 +8,7 @@ import java.math.BigDecimal;
  */
 public class Player {
     private Long id;
-    private Role role = Role.USER;
+    private Role role;
     private String username;
     private String password;
     private BigDecimal balance = BigDecimal.ZERO;

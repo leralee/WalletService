@@ -2,17 +2,25 @@ package org.example.repository;
 
 import org.example.interfaces.IPlayerRepository;
 import org.example.model.Player;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
  * Репозиторий для хранения и управления игроками.
  */
+
+@Repository
 public class PlayerRepository implements IPlayerRepository {
+
+    private final DatabaseConnection databaseConnection;
+
+    @Autowired
+    public PlayerRepository(DatabaseConnection databaseConnection) {
+        this.databaseConnection = databaseConnection;
+    }
 
     /**
      * Сохраняет игрока в репозиторий. Если у игрока нет идентификатора,
@@ -23,7 +31,7 @@ public class PlayerRepository implements IPlayerRepository {
     public void save(Player player) {
         if (player.getId() == null) {
             String query = "INSERT INTO wallet.player (role, username, password, balance) VALUES (?, ?, ?, ?)";
-            try (Connection connection = DatabaseConnection.getConnection();
+            try (Connection connection = databaseConnection.getConnection();
                  PreparedStatement preparedStatement = connection.prepareStatement(query)) {
                 preparedStatement.setString(1, player.getRole().toString());
                 preparedStatement.setString(2, player.getUsername());
@@ -36,7 +44,7 @@ public class PlayerRepository implements IPlayerRepository {
             }
         } else {
             String updateQuery = "UPDATE wallet.player SET role = ?, username = ?, password = ?, balance = ? WHERE id = ?";
-            try (Connection connection = DatabaseConnection.getConnection();
+            try (Connection connection = databaseConnection.getConnection();
                  PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
                 preparedStatement.setString(1, player.getRole().toString());
                 preparedStatement.setString(2, player.getUsername());
@@ -59,7 +67,7 @@ public class PlayerRepository implements IPlayerRepository {
      */
     public Optional<Player> findById(Long id) {
         String query = "SELECT * FROM wallet.player WHERE id = ?";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = databaseConnection.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setLong(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -88,7 +96,7 @@ public class PlayerRepository implements IPlayerRepository {
      */
     public Optional<Player> findByName(String username) {
         String query = "SELECT * FROM wallet.player WHERE username = ?";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = databaseConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setString(1, username);

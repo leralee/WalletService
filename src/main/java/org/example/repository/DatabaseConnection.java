@@ -1,43 +1,39 @@
 package org.example.repository;
 
-import java.io.IOException;
+import org.springframework.stereotype.Component;
+
 import java.sql.*;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 /**
- * @author valeriali on {17.10.2023}
- * @project walletService
+ * Класс для установления соединения с базой данных.
+ * Он читает параметры подключения из файла конфигурации и создает соединение с базой данных.
  */
+@Component
 public class DatabaseConnection {
-    private static String url;
-    private static String user;
-    private static String password;
 
-    static {
-
+    /**
+     * Получает соединение с базой данных.
+     * Загружает настройки подключения из файла конфигурации и инициирует соединение.
+     *
+     * @return Объект соединения с базой данных.
+     * @throws ClassNotFoundException Если драйвер базы данных не найден.
+     * @throws SQLException Если произошла ошибка при установлении соединения с базой данных.
+     */
+    public Connection getConnection() throws ClassNotFoundException, SQLException {
         Properties properties = new Properties();
-        String env = System.getenv("environment");
-        if (env == null) {
-            env = "local";
-        }
-        String propertiesFile = "db-" + env + ".properties";
-
         try {
-            properties.load(DatabaseConnection.class.getClassLoader().getResourceAsStream(propertiesFile));
-            url = properties.getProperty("url");
-            user = properties.getProperty("username");
-            password = properties.getProperty("password");
-        } catch (IOException e) {
-            throw new RuntimeException("Не удалось загрузить настройки базы данных", e);
+            properties.load(DatabaseConnection.class.getClassLoader().getResourceAsStream("application.yml"));
+        } catch (Exception e) {
+            throw new RuntimeException("Не удалось подключиться к базе данных");
         }
 
-    }
-
-    public static Connection getConnection() throws SQLException, ClassNotFoundException {
+        String URL = properties.getProperty("url");
+        String USER = properties.getProperty("user");
+        String PASSWORD = properties.getProperty("password");
         Class.forName("org.postgresql.Driver");
 
-        return DriverManager.getConnection(url, user, password);
+        return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
 }

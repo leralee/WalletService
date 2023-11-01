@@ -1,35 +1,34 @@
 package org.example.dto;
 
+
+import org.springframework.stereotype.Component;
+
 /**
- * @author valeriali on {22.10.2023}
- * @project walletService
+ * Класс DTO (Data Transfer Object) для передачи данных о пользователе.
+ * Используется для получения информации при регистрации и аутентификации игроков.
  */
+@Component
 public class PlayerDTO {
     private String username;
     private String password;
     private String role;
 
+    /**
+     * Получить имя пользователя.
+     *
+     * @return Имя пользователя в системе.
+     */
     public String getUsername() {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
+    /**
+     * Получить пароль пользователя.
+     *
+     * @return Пароль пользователя.
+     */
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
 }

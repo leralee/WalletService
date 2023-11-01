@@ -2,6 +2,8 @@ package org.example.repository;
 
 import org.example.interfaces.ITransactionRepository;
 import org.example.model.Transaction;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.UUID;
@@ -9,7 +11,15 @@ import java.util.UUID;
 /**
  * Репозиторий для хранения и управления транзакциями.
  */
+@Repository
 public class TransactionRepository implements ITransactionRepository {
+
+    private final DatabaseConnection databaseConnection;
+
+    @Autowired
+    public TransactionRepository(DatabaseConnection databaseConnection) {
+        this.databaseConnection = databaseConnection;
+    }
 
     /**
      * Добавляет новую транзакцию в репозиторий.
@@ -19,7 +29,7 @@ public class TransactionRepository implements ITransactionRepository {
     public void addTransaction(Transaction transaction) {
         String query = "INSERT INTO wallet.transaction " +
                 "(transaction_id, player_id, amount, transaction_type, timestamp) VALUES (?, ?, ?, ?, ?)";
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = databaseConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setObject(1, transaction.getTransactionId());
             preparedStatement.setLong(2, transaction.getPlayerId());
@@ -44,7 +54,7 @@ public class TransactionRepository implements ITransactionRepository {
         String query = "SELECT * FROM wallet.transaction WHERE transaction_id = ?";
         boolean exists = false;
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = databaseConnection.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setObject(1, transactionId);
             ResultSet resultSet = preparedStatement.executeQuery();

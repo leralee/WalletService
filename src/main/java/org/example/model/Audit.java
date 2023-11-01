@@ -7,6 +7,7 @@ import java.util.Objects;
  * Класс представляющий собой запись аудита. Используется для отслеживания
  * различных действий, связанных с игроками в системе.
  */
+//@Entity
 public class Audit {
 
     private Long playerId;

@@ -1,0 +1,15 @@
+jwt:
+  secret: MANGO
+
+database:
+  url: jdbc:postgresql://localhost:5432/wallet_service_db
+  user: valeriali
+  password: postgres
+
+driver:
+  org:
+    postgresql: Driver
+
+
+
+

@@ -80,16 +80,22 @@ URL: `http://localhost:8080/balances` c GET запросом
 500 Internal Server Error: Внутренние ошибки сервера.
 GET /balances
 
+## Swagger UI Access
+
+Для доступа к интерфейсу Swagger UI и просмотра документации по API, пожалуйста, перейдите по следующей ссылке:
+
+[http://localhost:8080/swagger-ui/](http://localhost:8080/swagger-ui/)
+
+[http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+
+
 
 ## Для запуска PostgreSQL в Docker:
 
 1. Убедитесь, что у вас установлен Docker и docker-compose.
 2. Перейдите в каталог проекта и выполните команду:
 ```bash
-mvn clean package
-docker build -t app-image .
 docker-compose up -d
-docker-compose run --service-ports --rm my-app
 ```
 3. Для остановки и удалении всех контейнеров
 ```bash

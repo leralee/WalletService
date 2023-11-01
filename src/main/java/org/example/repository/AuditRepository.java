@@ -2,6 +2,8 @@ package org.example.repository;
 
 import org.example.interfaces.IAuditRepository;
 import org.example.model.Audit;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -11,7 +13,17 @@ import java.util.List;
  * Репозиторий для работы с записями аудита в приложении Wallet Service.
  * Позволяет сохранять и извлекать записи аудита.
  */
+
+@Repository
 public class AuditRepository implements IAuditRepository {
+
+    private final DatabaseConnection databaseConnection;
+
+    @Autowired
+    public AuditRepository(DatabaseConnection databaseConnection) {
+        this.databaseConnection = databaseConnection;
+    }
+
     /**
      * Сохраняет запись аудита в базу данных.
      *
@@ -19,7 +31,7 @@ public class AuditRepository implements IAuditRepository {
      */
     public void addRecord(Audit record) {
         String query = "INSERT INTO wallet.audit (player_id, action_type, timestamp) VALUES (?, ?, ?)";
-            try (Connection connection = DatabaseConnection.getConnection();
+            try (Connection connection = databaseConnection.getConnection();
                  PreparedStatement preparedStatement = connection.prepareStatement(query)) {
                 preparedStatement.setObject(1, record.getPlayerId());
                 preparedStatement.setString(2, record.getActionType().toString());
@@ -41,7 +53,7 @@ public class AuditRepository implements IAuditRepository {
         String query = "SELECT * FROM wallet.audit";
         List<Audit> records = new ArrayList<>();
         ResultSet resultSet;
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (Connection connection = databaseConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {

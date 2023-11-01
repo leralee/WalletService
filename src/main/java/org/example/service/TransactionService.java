@@ -6,6 +6,7 @@ import org.example.interfaces.ITransactionRepository;
 import org.example.model.Player;
 import org.example.model.Transaction;
 import org.example.model.Transaction.TransactionType;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -14,6 +15,8 @@ import java.util.UUID;
  * Сервис для выполнения транзакций в приложении Wallet Service.
  * Предоставляет методы для пополнения и снятия средств со счета игрока.
  */
+
+@Service
 public class TransactionService {
     private final ITransactionRepository transactionRepository;
     private final PlayerService playerService;

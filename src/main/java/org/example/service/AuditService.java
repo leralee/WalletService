@@ -2,6 +2,7 @@ package org.example.service;
 
 import org.example.interfaces.IAuditRepository;
 import org.example.model.Audit;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,6 +11,8 @@ import java.util.List;
  * Сервис для ведения журнала аудита в приложении Wallet Service.
  * Позволяет записывать различные действия, производимые игроками, для последующего анализа.
  */
+
+@Service
 public class AuditService {
     private final IAuditRepository auditRepository;
 
