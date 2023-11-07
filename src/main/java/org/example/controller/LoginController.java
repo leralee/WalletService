@@ -2,20 +2,19 @@ package org.example.controller;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.common.Player;
 import org.example.dto.PlayerDTO;
 import org.example.in.WalletServiceFacade;
-import org.example.model.Player;
-import org.example.model.Player.Role;
+
 import org.example.security.JWTUtil;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpSession;
 import java.util.Map;
 
 /**
@@ -47,22 +46,21 @@ public class LoginController {
      * Если данные аутентификации корректны, создает и возвращает JWT, в противном случае возвращает ошибку аутентификации.
      *
      * @param playerDTO Объект передачи данных, содержащий учетные данные пользователя (имя пользователя и пароль).
-     * @param session   Текущая сессия HTTP, в которую добавляется аутентифицированный пользователь.
      * @return {@code ResponseEntity<?>} с JWT в заголовках и сообщением об успешной аутентификации или ошибке.
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody PlayerDTO playerDTO, HttpSession session) {
+    public ResponseEntity<?> login(@RequestBody PlayerDTO playerDTO) {
         try {
-            Player loggedPlayer = walletServiceFacade.authorizePlayer(playerDTO.getUsername(), playerDTO.getPassword());
+            ModelMapper modelMapper = new ModelMapper();
+            Player player = modelMapper.map(playerDTO, Player.class);
+            Player loggedPlayer = walletServiceFacade.authorizePlayer(player);
             if (loggedPlayer != null) {
-                session.setAttribute("loggedPlayer", loggedPlayer);
-                Role role = loggedPlayer.getRole();
-
-                String token = jwtUtil.generateToken(loggedPlayer.getUsername(), role.toString());
-                HttpHeaders headers = new HttpHeaders();
-                headers.set("Authorization", "Bearer " + token);
-
-                return new ResponseEntity<>(Map.of("status", "success", "message", "Успешная авторизация"), headers, HttpStatus.OK);
+                String token = jwtUtil.generateToken(loggedPlayer.getUsername(), loggedPlayer.getRole().toString());
+                return new ResponseEntity<>(Map.of(
+                        "status", "success",
+                        "message", "Успешная авторизация",
+                        "token", token
+                ), HttpStatus.OK);
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Map.of("status", "error", "message", "Ошибка авторизации. Неправильное имя пользователя или пароль."));

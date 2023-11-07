@@ -1,16 +1,20 @@
 package org.example.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.security.JWTFilter;
 import org.example.security.JWTUtil;
+import org.example.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
-import org.springframework.core.env.Environment;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import springfox.documentation.oas.annotations.EnableOpenApi;
+
+import javax.sql.DataSource;
 
 /**
  * Основной класс конфигурации Spring для настройки компонентов веб-приложения.
@@ -20,11 +24,10 @@ import springfox.documentation.oas.annotations.EnableOpenApi;
  * </p>
  */
 @Configuration
-@ComponentScan("org.example")
 @EnableWebMvc
-@EnableAspectJAutoProxy
-@EnableOpenApi
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 public class SpringConfig implements WebMvcConfigurer {
+
 
     /**
      * Bean для ObjectMapper, используемого для сериализации и десериализации JSON.
@@ -36,38 +39,46 @@ public class SpringConfig implements WebMvcConfigurer {
         return new ObjectMapper();
     }
 
-    /**
-     * Bean для утилиты JWT, облегчающей работу с JWT (JSON Web Tokens).
-     *
-     * @return экземпляр {@link JWTUtil}
-     */
     @Bean
     public JWTUtil jwtUtil() {
         return new JWTUtil();
     }
+
+    @Bean
+    public JWTFilter jwtFilter(JWTUtil jwtUtil, PlayerService playerService) {
+        return new JWTFilter(jwtUtil, playerService);
+    }
+
+    @Bean
+    public FilterRegistrationBean<JWTFilter> jwtFilterRegistration(JWTFilter jwtFilter) {
+        FilterRegistrationBean<JWTFilter> registrationBean = new FilterRegistrationBean<>(jwtFilter);
+        registrationBean.addUrlPatterns("/balances", "/admin");
+        return registrationBean;
+    }
+
 
     /**
      * Настраивает обработчики ресурсов для добавления путей к ресурсам Swagger UI.
      *
      * @param registry реестр обработчиков ресурсов
      */
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry
-                .addResourceHandler("/swagger-ui/**")
-                .addResourceLocations("classpath:/META-INF/resources/webjars/springfox-swagger-ui/")
-                .resourceChain(false);
-    }
+//    @Override
+//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+//        registry
+//                .addResourceHandler("/swagger-ui/**")
+//                .addResourceLocations("classpath:/META-INF/resources/webjars/springfox-swagger-ui/")
+//                .resourceChain(false);
+//    }
 
     /**
      * Настраивает контроллеры представлений для перенаправления на Swagger UI.
      *
      * @param registry реестр контроллеров представлений
      */
-    @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/swagger-ui/")
-                .setViewName("forward:" + "/swagger-ui/index.html");
-    }
+//    @Override
+//    public void addViewControllers(ViewControllerRegistry registry) {
+//        registry.addViewController("/swagger-ui/")
+//                .setViewName("forward:" + "/swagger-ui/index.html");
+//    }
 
 }

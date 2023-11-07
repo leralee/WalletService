@@ -1,7 +1,5 @@
-package org.example.service;
+package org.example.common;
 
-import org.example.interfaces.IAuditRepository;
-import org.example.model.Audit;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,7 +11,7 @@ import java.util.List;
  */
 
 @Service
-public class AuditService {
+public class AuditService  {
     private final IAuditRepository auditRepository;
 
     public AuditService(IAuditRepository auditRepository) {
@@ -24,7 +22,7 @@ public class AuditService {
      * Сервис для ведения журнала аудита в приложении Wallet Service.
      * Позволяет записывать различные действия, производимые игроками, для последующего анализа.
      */
-    public void recordAction(Long playerId, Audit.ActionType actionType) {
+    public void recordAction(Long playerId, ActionType actionType) {
         Audit record = new Audit(playerId, actionType, LocalDateTime.now());
         auditRepository.addRecord(record);
     }

@@ -1,17 +1,18 @@
 package org.example.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.example.common.Player;
 import org.example.dto.BalanceDTO;
 import org.example.exception.InvalidAmountException;
 import org.example.exception.TransactionExistsException;
 import org.example.in.WalletServiceFacade;
-import org.example.model.Player;
+
 import org.example.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
@@ -39,19 +40,11 @@ public class BalanceController {
         this.walletServiceFacade = walletServiceFacade;
     }
 
-    /**
-     * Получение текущего баланса игрока.
-     * Метод возвращает текущий баланс пользователя, аутентифицированного через HTTP-сессию.
-     *
-     * @param bearerToken токен авторизации, полученный в заголовке запроса.
-     * @param httpSession текущая сессия HTTP, используется для получения данных авторизованного пользователя.
-     * @return {@code ResponseEntity<?>} с текущим балансом игрока, если аутентификация прошла успешно.
-     */
-    @GetMapping("")
-    public ResponseEntity<?> getCurrentBalance(@RequestHeader("Authorization") String bearerToken,
-                                               HttpSession httpSession) {
 
-        Player player = (Player) httpSession.getAttribute("loggedPlayer");
+    @GetMapping("")
+    public ResponseEntity<?> getCurrentBalance(HttpServletRequest request) {
+
+        Player player = (Player) request.getAttribute("player");
 
         return ResponseEntity.ok(Map.of("message","Текущий баланс: " + player.getBalance()));
     }
@@ -62,39 +55,44 @@ public class BalanceController {
      * возвращая новый баланс пользователя или сообщение об ошибке.
      *
      * @param balanceDTO DTO, содержащее информацию о транзакции (сумма и действие).
-     * @param bearerToken токен авторизации, полученный в заголовке запроса.
-     * @param httpSession текущая сессия HTTP, используется для получения данных авторизованного пользователя.
      * @return {@code ResponseEntity<?>} со статусом операции изменения баланса.
-     * @throws InvalidAmountException если сумма транзакции недопустима.
-     * @throws TransactionExistsException если транзакция уже существует.
      */
-    @PostMapping("")
-    public ResponseEntity<?> changeBalance(@RequestBody BalanceDTO balanceDTO,
-                                           @RequestHeader("Authorization") String bearerToken,
-                                           HttpSession httpSession) {
+    @PostMapping("/deposit")
+    public ResponseEntity<?> deposit(@RequestBody BalanceDTO balanceDTO, HttpServletRequest request) {
+        Player player = (Player) request.getAttribute("player");
+        if (player == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Пользователь не авторизован"));
+        }
+        try {
+            walletServiceFacade.credit(player, balanceDTO.getAmount(), UUID.fromString(balanceDTO.getTransaction_id()));
+            return ResponseEntity.ok(Map.of("message", "Средства успешно зачислены"));
+        } catch (InvalidAmountException | TransactionExistsException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Ошибка на сервере"));
+        }
+    }
 
-        Player player = (Player) httpSession.getAttribute("loggedPlayer");
+    @PostMapping("/withdraw")
+    public ResponseEntity<?> withdraw(@RequestBody BalanceDTO balanceDTO, HttpServletRequest request) {
+        Player player = (Player) request.getAttribute("player");
+        if (player == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Пользователь не авторизован"));
+        }
 
         try {
-            switch (balanceDTO.getAction()) {
-                case "deposit":
-                    walletServiceFacade.credit(player, balanceDTO.getAmount(),
-                            UUID.fromString(balanceDTO.getTransaction_id()));
-                    break;
-                case "withdraw":
-                    BigDecimal currentBalance = walletServiceFacade.getPlayerBalance(player.getId());
-                    if (currentBalance.compareTo(balanceDTO.getAmount()) >= 0) {
-                        walletServiceFacade.withdraw(player, balanceDTO.getAmount(),
-                                UUID.fromString(balanceDTO.getTransaction_id()));
-                    } else {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                .body(Map.of("message", "Недостаточно средств"));
-                    }
-                    break;
+            BigDecimal currentBalance = walletServiceFacade.getPlayerBalance(player.getId());
+            if (currentBalance.compareTo(balanceDTO.getAmount()) >= 0) {
+                walletServiceFacade.withdraw(player, balanceDTO.getAmount(), UUID.fromString(balanceDTO.getTransaction_id()));
+                return ResponseEntity.ok(Map.of("message", "Средства успешно сняты"));
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("message", "Недостаточно средств"));
             }
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(Map.of("message", "Текущий баланс: " +
-                            walletServiceFacade.getPlayerBalance(player.getId())));
         } catch (InvalidAmountException | TransactionExistsException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("message", e.getMessage()));

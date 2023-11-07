@@ -7,11 +7,9 @@ import org.springframework.stereotype.Component;
  * Класс DTO (Data Transfer Object) для передачи данных о пользователе.
  * Используется для получения информации при регистрации и аутентификации игроков.
  */
-@Component
 public class PlayerDTO {
     private String username;
     private String password;
-    private String role;
 
     /**
      * Получить имя пользователя.

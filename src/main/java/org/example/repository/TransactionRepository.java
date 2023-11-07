@@ -3,9 +3,11 @@ package org.example.repository;
 import org.example.interfaces.ITransactionRepository;
 import org.example.model.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.sql.*;
+import java.sql.Timestamp;
 import java.util.UUID;
 
 /**
@@ -14,11 +16,11 @@ import java.util.UUID;
 @Repository
 public class TransactionRepository implements ITransactionRepository {
 
-    private final DatabaseConnection databaseConnection;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public TransactionRepository(DatabaseConnection databaseConnection) {
-        this.databaseConnection = databaseConnection;
+    public TransactionRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     /**
@@ -29,18 +31,15 @@ public class TransactionRepository implements ITransactionRepository {
     public void addTransaction(Transaction transaction) {
         String query = "INSERT INTO wallet.transaction " +
                 "(transaction_id, player_id, amount, transaction_type, timestamp) VALUES (?, ?, ?, ?, ?)";
-        try (Connection connection = databaseConnection.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setObject(1, transaction.getTransactionId());
-            preparedStatement.setLong(2, transaction.getPlayerId());
-            preparedStatement.setBigDecimal(3, transaction.getAmount());
-            preparedStatement.setString(4, transaction.getTransactionType().toString());
-            preparedStatement.setTimestamp(5, Timestamp.valueOf(transaction.getTimestamp()));
-
-            preparedStatement.executeUpdate();
-        } catch (SQLException | ClassNotFoundException e) {
-            System.err.println("Ошибка при добавлении транзакции: "
-                    + e.getMessage());
+        try {
+            jdbcTemplate.update(query,
+                    transaction.getTransactionId(),
+                    transaction.getPlayerId(),
+                    transaction.getAmount(),
+                    transaction.getTransactionType().toString(),
+                    Timestamp.valueOf(transaction.getTimestamp()));
+        } catch (DataAccessException e) {
+            System.err.println("Ошибка при добавлении транзакции: " + e.getMessage());
         }
     }
 
@@ -51,20 +50,13 @@ public class TransactionRepository implements ITransactionRepository {
      * @return true, если транзакция с таким идентификатором существует, иначе false.
      */
     public boolean existsById(UUID transactionId) {
-        String query = "SELECT * FROM wallet.transaction WHERE transaction_id = ?";
-        boolean exists = false;
-
-        try (Connection connection = databaseConnection.getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setObject(1, transactionId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                exists = true;
-            }
-
-        } catch (SQLException | ClassNotFoundException e) {
-            System.err.println("Ошибка при проверке наличия записи: " + e.getMessage());
+        String query = "SELECT COUNT(*) FROM wallet.transaction WHERE transaction_id = ?";
+        try {
+            Integer count = jdbcTemplate.queryForObject(query, new Object[]{transactionId}, Integer.class);
+            return count != null && count > 0;
+        } catch (DataAccessException e) {
+            System.err.println("Ошибка при проверке наличия транзакции: " + e.getMessage());
+            return false;
         }
-        return exists;
     }
 }

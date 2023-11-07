@@ -1,7 +1,10 @@
 package org.example.service;
 
+import org.example.common.AuditService;
+import org.example.common.Player;
+import org.example.exception.PlayerExistsException;
 import org.example.interfaces.IPlayerRepository;
-import org.example.model.Player;
+
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -16,33 +19,26 @@ import java.util.Optional;
 @Service
 public class PlayerService {
     private final IPlayerRepository playerRepository;
-    private final AuditService auditService;
 
-
-    public PlayerService(IPlayerRepository playerRepository, AuditService auditService) {
+    public PlayerService(IPlayerRepository playerRepository) {
         this.playerRepository = playerRepository;
-        this.auditService = auditService;
     }
 
 
     /**
      * Регистрирует нового игрока с заданными учетными данными и ролью.
      *
-     * @param username Имя пользователя для регистрации.
-     * @param password Пароль пользователя.
-     * @param role     Роль игрока.
      * @return Optional содержащий объект игрока, если регистрация прошла успешно.
      */
-    public Optional<Player> registerPlayer(String username, String password, Player.Role role) {
-        if (playerRepository.findByName(username).isPresent()) {
-            return Optional.empty();
+    public Optional<Player> save(Player player) throws PlayerExistsException {
+        if (playerRepository.findByName(player.getUsername()).isPresent()) {
+            throw new PlayerExistsException("Пользователем с данным логином уже существует.");
         }
-        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-        Player player = new Player();
-        player.setUsername(username);
+
+        String hashedPassword = BCrypt.hashpw(player.getPassword(), BCrypt.gensalt());
         player.setPassword(hashedPassword);
         player.setBalance(BigDecimal.ZERO);
-        player.setRole(role);
+        player.setRole(Player.Role.USER);
 
         playerRepository.save(player);
 
@@ -53,13 +49,11 @@ public class PlayerService {
     /**
      * Авторизует игрока с заданными учетными данными.
      *
-     * @param username Имя пользователя.
-     * @param password Пароль пользователя.
      * @return Объект игрока, если авторизация прошла успешно, иначе - null.
      */
-    public Player authorizePlayer(String username, String password) {
-        return playerRepository.findByName(username)
-                .filter(player -> BCrypt.checkpw(password, player.getPassword()))
+    public Player authorizePlayer(Player player) {
+        return playerRepository.findByName(player.getUsername())
+                .filter(playerFromDB -> BCrypt.checkpw(player.getPassword(), playerFromDB.getPassword()))
                 .orElse(null);
     }
 
@@ -83,6 +77,10 @@ public class PlayerService {
      */
     public void updateBalance(Player player, BigDecimal newBalance) {
         player.setBalance(newBalance);
-        playerRepository.save(player);
+        playerRepository.update(player.getId(), player);
+    }
+
+    public Optional<Player> findByUsername(String username) {
+        return playerRepository.findByName(username);
     }
 }

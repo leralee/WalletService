@@ -1,9 +1,6 @@
 package org.example.interfaces;
 
 import org.example.model.Transaction;
-
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 /**

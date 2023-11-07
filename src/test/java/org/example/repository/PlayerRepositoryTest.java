@@ -6,7 +6,7 @@
 //import liquibase.database.jvm.JdbcConnection;
 //import liquibase.exception.DatabaseException;
 //import liquibase.resource.ClassLoaderResourceAccessor;
-//import org.example.model.Player;
+//import org.example.common.Player;
 //import org.junit.jupiter.api.*;
 //import org.testcontainers.containers.PostgreSQLContainer;
 //import org.testcontainers.junit.jupiter.Testcontainers;

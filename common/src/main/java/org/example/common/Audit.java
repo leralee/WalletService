@@ -1,4 +1,4 @@
-package org.example.model;
+package org.example.common;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -14,20 +14,6 @@ public class Audit {
     private ActionType actionType;
     private LocalDateTime timestamp;
 
-    /**
-     * Перечисление возможных типов действий, которые могут быть зафиксированы в записи аудита.
-     */
-    public enum ActionType {
-        LOGIN,
-        LOGIN_FAILED,
-        LOGOUT,
-        CREDIT,
-        CREDIT_FAILED,
-        WITHDRAW,
-        WITHDRAW_FAILED,
-        REGISTRATION_SUCCESS,
-        REGISTRATION_FAILED
-    }
 
     /**
      * Создает новую запись аудита.

@@ -1,6 +1,8 @@
 package org.example.interfaces;
 
-import org.example.model.Player;
+
+
+import org.example.common.Player;
 
 import java.util.Optional;
 
@@ -26,4 +28,6 @@ public interface IPlayerRepository {
      * @return Optional объект игрока, если игрок с таким именем найден, иначе Optional.empty().
      */
     Optional<Player> findByName(String name);
+
+    void update(Long id, Player player);
 }

@@ -4,6 +4,7 @@ package org.example.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,12 +18,11 @@ import java.util.Date;
  * Утилитный класс для работы с JWT-токенами.
  * Отвечает за генерацию и валидацию токенов.
  */
-//@PropertySource("classpath:application.yml")
 @Component
 public class JWTUtil {
 
-    @Value("${jwt.secret}")
-    private String SECRET_KEY;
+//    @Value("${jwt.secret}")
+    private String SECRET_KEY = "MANGO";
 
     /**
      * Генерирует JWT-токен для указанных имени пользователя и роли.
@@ -34,7 +34,11 @@ public class JWTUtil {
     public String generateToken(String username, String role) {
         Date expirationDate = Date.from(ZonedDateTime.now().plusMinutes(60).toInstant());
 
+        System.out.println(SECRET_KEY);
+
+
         return JWT.create()
+                .withSubject("User details")
                 .withClaim("username", username)
                 .withClaim("role", role)
                 .withIssuedAt(new Date())
@@ -49,24 +53,16 @@ public class JWTUtil {
      * @param token JWT-токен, который необходимо проверить.
      * @return true, если токен действителен, иначе false.
      */
-    public boolean validateToken(String token) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
-            JWTVerifier verifier = JWT.require(algorithm)
-                    .withIssuer("ylab")
-                    .build();
-            verifier.verify(token);
-            return true;
-        } catch (JWTDecodeException exception) {
-            return false;
-        }
+    public String validateTokenAndRetrieveClaim(String token) throws JWTVerificationException {
+        Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
+        JWTVerifier verifier = JWT.require(algorithm)
+                .withSubject("User details")
+                .withIssuer("ylab")
+                .build();
+
+        DecodedJWT jwt = verifier.verify(token);
+        return jwt.getClaim("username").asString();
     }
 
-    public String extractTokenFromHeader(String bearerToken) {
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-        return null;
-    }
 
 }

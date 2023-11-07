@@ -1,11 +1,12 @@
 package org.example.repository;
 
+import org.example.common.Player;
 import org.example.interfaces.IPlayerRepository;
-import org.example.model.Player;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.sql.*;
 import java.util.Optional;
 
 /**
@@ -15,48 +16,27 @@ import java.util.Optional;
 @Repository
 public class PlayerRepository implements IPlayerRepository {
 
-    private final DatabaseConnection databaseConnection;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public PlayerRepository(DatabaseConnection databaseConnection) {
-        this.databaseConnection = databaseConnection;
+    public PlayerRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     /**
-     * Сохраняет игрока в репозиторий. Если у игрока нет идентификатора,
-     * ему будет присвоен новый.
+     * Сохраняет игрока в репозиторий.
      *
      * @param player Объект игрока, который необходимо сохранить.
      */
     public void save(Player player) {
-        if (player.getId() == null) {
-            String query = "INSERT INTO wallet.player (role, username, password, balance) VALUES (?, ?, ?, ?)";
-            try (Connection connection = databaseConnection.getConnection();
-                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-                preparedStatement.setString(1, player.getRole().toString());
-                preparedStatement.setString(2, player.getUsername());
-                preparedStatement.setString(3, player.getPassword());
-                preparedStatement.setBigDecimal(4, player.getBalance());
+        String query = "INSERT INTO wallet.player (role, username, password, balance) VALUES (?, ?, ?, ?)";
+        jdbcTemplate.update(query, player.getRole(), player.getUsername(), player.getPassword(), player.getBalance());
+    }
 
-                preparedStatement.executeUpdate();
-            } catch (SQLException | ClassNotFoundException e) {
-                System.err.println("Ошибка при добавлении пользователя: " + e.getMessage());
-            }
-        } else {
-            String updateQuery = "UPDATE wallet.player SET role = ?, username = ?, password = ?, balance = ? WHERE id = ?";
-            try (Connection connection = databaseConnection.getConnection();
-                 PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
-                preparedStatement.setString(1, player.getRole().toString());
-                preparedStatement.setString(2, player.getUsername());
-                preparedStatement.setString(3, player.getPassword());
-                preparedStatement.setBigDecimal(4, player.getBalance());
-                preparedStatement.setLong(5, player.getId());
-
-                preparedStatement.executeUpdate();
-            } catch (SQLException | ClassNotFoundException e) {
-                System.err.println("Ошибка при обновлении пользователя: " + e.getMessage());
-            }
-        }
+    public void update(Long id, Player player) {
+        String query = "UPDATE wallet.player SET role = ?, username = ?, password = ?, balance = ? WHERE id = ?";
+        System.out.println();
+        jdbcTemplate.update(query, player.getRole().toString(), player.getUsername(), player.getPassword(), player.getBalance(), id);
     }
 
     /**
@@ -67,25 +47,7 @@ public class PlayerRepository implements IPlayerRepository {
      */
     public Optional<Player> findById(Long id) {
         String query = "SELECT * FROM wallet.player WHERE id = ?";
-        try (Connection connection = databaseConnection.getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setLong(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                Player player = new Player();
-                player.setId(resultSet.getLong("id"));
-                player.setUsername(resultSet.getString("username"));
-                player.setPassword(resultSet.getString("password"));
-                player.setRole(Player.Role.valueOf(resultSet.getString("role")));
-                player.setBalance(resultSet.getBigDecimal("balance"));
-
-                return Optional.of(player);
-            }
-        } catch (SQLException | ClassNotFoundException e) {
-            System.err.println("Ошибка нахождения пользователя: " + e.getMessage());
-        }
-
-        return Optional.empty();
+        return jdbcTemplate.query(query, new BeanPropertyRowMapper<>(Player.class), id).stream().findAny();
     }
 
     /**
@@ -96,25 +58,6 @@ public class PlayerRepository implements IPlayerRepository {
      */
     public Optional<Player> findByName(String username) {
         String query = "SELECT * FROM wallet.player WHERE username = ?";
-        try (Connection connection = databaseConnection.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-
-            preparedStatement.setString(1, username);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                Player player = new Player();
-                player.setId(resultSet.getLong("id"));
-                player.setUsername(resultSet.getString("username"));
-                player.setPassword(resultSet.getString("password"));
-                player.setRole(Player.Role.valueOf(resultSet.getString("role")));
-                player.setBalance(resultSet.getBigDecimal("balance"));
-
-                return Optional.of(player);
-            }
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
+        return jdbcTemplate.query(query, new BeanPropertyRowMapper<>(Player.class), username).stream().findAny();
     }
 }

@@ -1,22 +1,19 @@
 package org.example.security;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
-
-import org.example.model.Player;
+import org.example.common.Player;
+import org.example.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Optional;
+
 
 /**
  * Фильтр для административных запросов, требующих аутентификации.
@@ -24,30 +21,39 @@ import java.util.Set;
  */
 @Component
 public class JWTFilter extends OncePerRequestFilter {
-    private final Set<String> includedPaths = new HashSet<>(Arrays.asList("/secure-endpoint1", "/secure-endpoint2"));
+
+    private final JWTUtil jwtUtil;
+    private final PlayerService playerService;
+
+    @Autowired
+    public JWTFilter(JWTUtil jwtUtil, PlayerService playerService) {
+        this.jwtUtil = jwtUtil;
+        this.playerService = playerService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && !authHeader.isBlank() && authHeader.startsWith("Bearer ")) {
+            String jwt = authHeader.substring(7);
 
-        if (includedPaths.contains(request.getServletPath())) {
+            try {
+                if (!jwt.isBlank()) {
+                    String username = jwtUtil.validateTokenAndRetrieveClaim(jwt);
+                    Optional<Player> player = playerService.findByUsername(username);
 
-            HttpSession session = request.getSession();
-            Player player = (Player) session.getAttribute("loggedPlayer");
-            if (player == null) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Пользователь не авторизован");
-                return;
-            }
-
-            String authHeader = request.getHeader("Authorization");
-            if (authHeader != null && !authHeader.isBlank() && authHeader.startsWith("Bearer ")) {
-                String jwt = authHeader.substring(7);
-                if (jwt.isBlank()) {
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Невалидный JWT токен");
+                    player.ifPresent(value -> request.setAttribute("player", value));
+                } else {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Пользователь не найден");
                     return;
                 }
+            } catch (JWTVerificationException e) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Невалидный JWT токен");
+                return;
             }
-        }
-        filterChain.doFilter(request, response);
     }
+    filterChain.doFilter(request, response);
+    }
+
 }

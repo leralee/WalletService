@@ -10,19 +10,8 @@ import java.math.BigDecimal;
  */
 @Component
 public class BalanceDTO {
-    private String action;
     private BigDecimal amount;
     private String transaction_id;
-
-    /**
-     * Получает действие, связанное с балансом.
-     *
-     * @return Действие в виде строки, может быть "deposit" для пополнения или "withdraw" для снятия средств.
-     */
-    public String getAction() {
-        return action;
-    }
-
 
     /**
      * Получает сумму операции.

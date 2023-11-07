@@ -10,6 +10,5 @@
         <Root level="info">
             <AppenderRef ref="Console"/>
         </Root>
-        <logger name="liquibase" level="INFO"/>
     </Loggers>
 </Configuration>

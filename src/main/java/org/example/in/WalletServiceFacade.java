@@ -1,10 +1,12 @@
 package org.example.in;
 
+import org.example.common.Player;
 import org.example.exception.InvalidAmountException;
+import org.example.exception.PlayerExistsException;
 import org.example.exception.TransactionExistsException;
-import org.example.model.Audit;
-import org.example.model.Player;
-import org.example.service.AuditService;
+import org.example.common.Audit;
+
+import org.example.common.AuditService;
 import org.example.service.PlayerService;
 import org.example.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,26 +47,14 @@ public class WalletServiceFacade {
         this.auditService = auditService;
     }
 
-    /**
-     * Регистрирует нового игрока с указанными именем пользователя и паролем.
-     *
-     * @param username Имя пользователя.
-     * @param password Пароль.
-     * @return Опциональный объект игрока, если регистрация прошла успешно.
-     */
-    public Optional<Player> registerPlayer(String username, String password) {
-        return playerService.registerPlayer(username, password, Player.Role.USER);
+
+    public Optional<Player> save(Player player) throws PlayerExistsException {
+        return playerService.save(player);
     }
 
-    /**
-     * Авторизует игрока с указанными именем пользователя и паролем.
-     *
-     * @param username Имя пользователя.
-     * @param password Пароль.
-     * @return Объект авторизованного игрока.
-     */
-    public Player authorizePlayer(String username, String password) {
-        return playerService.authorizePlayer(username, password);
+
+    public Player authorizePlayer(Player player) {
+        return playerService.authorizePlayer(player);
     }
 
     /**

@@ -1,6 +1,6 @@
-package org.example.interfaces;
+package org.example.common;
 
-import org.example.model.Audit;
+import org.example.common.Audit;
 
 import java.util.List;
 
