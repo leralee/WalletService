@@ -1,4 +1,4 @@
-package ylab.ru.application.exception;
+package ru.ylab.common.exception;
 
 /**
  * Представляет исключение, которое выбрасывается, когда транзакция уже существует

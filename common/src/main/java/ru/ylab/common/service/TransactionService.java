@@ -1,9 +1,15 @@
-package ylab.ru.application.service;
+package ru.ylab.common.service;
 
-import ylab.ru.application.exception.InvalidAmountException;
-import ylab.ru.application.exception.TransactionExistsException;
 
 import org.springframework.stereotype.Service;
+import ru.ylab.common.exception.InvalidAmountException;
+import ru.ylab.common.exception.TransactionExistsException;
+import ru.ylab.common.interfaces.ITransactionRepository;
+import ru.ylab.common.model.Player;
+import ru.ylab.common.model.Transaction;
+
+import java.math.BigDecimal;
+import java.util.UUID;
 
 /**
  * Сервис для выполнения транзакций в приложении Wallet Service.
@@ -12,17 +18,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TransactionService {
-//    private final ITransactionRepository transactionRepository;
-//    private final PlayerService playerService;
+    private final ITransactionRepository transactionRepository;
+    private final PlayerService playerService;
 
 //    private final AuditService auditService;
 
 
-//    public TransactionService(ITransactionRepository transactionRepository, PlayerService playerService, AuditService auditService) {
-//        this.transactionRepository = transactionRepository;
-//        this.playerService = playerService;
+    public TransactionService(ITransactionRepository transactionRepository, PlayerService playerService) {
+        this.transactionRepository = transactionRepository;
+        this.playerService = playerService;
 //        this.auditService = auditService;
-//    }
+    }
 
 
     /**
@@ -39,22 +45,22 @@ public class TransactionService {
      * @throws TransactionExistsException Если транзакция с указанным ID уже существует.
      * @throws InvalidAmountException     Если предоставленная сумма недействительна (<= 0).
      */
-//    public void credit(Player player, BigDecimal amount, UUID transactionId)
-//            throws TransactionExistsException, InvalidAmountException {
-//        if (transactionRepository.existsById(transactionId)) {
-//            throw new TransactionExistsException("Транзакция с данным ID уже существует.");
-//        }
-//
-//        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-//            throw new InvalidAmountException("Сумма должна быть положительной.");
-//        }
-//
-//        BigDecimal updatedBalance = player.getBalance().add(amount);
-//        playerService.updateBalance(player, updatedBalance);
-//
-//        Transaction transaction = new Transaction(player.getId(), TransactionType.CREDIT, amount, transactionId);
-//        transactionRepository.addTransaction(transaction);
-//    }
+    public void credit(Player player, BigDecimal amount, UUID transactionId)
+            throws TransactionExistsException, InvalidAmountException {
+        if (transactionRepository.existsById(transactionId)) {
+            throw new TransactionExistsException("Транзакция с данным ID уже существует.");
+        }
+
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidAmountException("Сумма должна быть положительной.");
+        }
+
+        BigDecimal updatedBalance = player.getBalance().add(amount);
+        playerService.updateBalance(player, updatedBalance);
+
+        Transaction transaction = new Transaction(player.getId(), Transaction.TransactionType.CREDIT, amount, transactionId);
+        transactionRepository.addTransaction(transaction);
+    }
 
     /**
      * Снимает указанную сумму со счета игрока.
@@ -70,18 +76,18 @@ public class TransactionService {
      * @throws TransactionExistsException Если транзакция с указанным ID уже существует.
      * @throws InvalidAmountException     Если предоставленная сумма недействительна (<= 0) или баланс игрока недостаточен.
      */
-//    public void withdraw(Player player, BigDecimal amount, UUID transactionId)
-//            throws TransactionExistsException, InvalidAmountException {
-//        checkTransactionIdExists(transactionId, player);
-//        checkAmountPositive(amount, player);
-//        checkSufficientBalance(player, amount);
-//
-//        BigDecimal updatedBalance = player.getBalance().subtract(amount);
-//        playerService.updateBalance(player, updatedBalance);
-//
-//        Transaction transaction = new Transaction(player.getId(), TransactionType.DEBIT, amount, transactionId);
-//        transactionRepository.addTransaction(transaction);
-//    }
+    public void withdraw(Player player, BigDecimal amount, UUID transactionId)
+            throws TransactionExistsException, InvalidAmountException {
+        checkTransactionIdExists(transactionId, player);
+        checkAmountPositive(amount, player);
+        checkSufficientBalance(player, amount);
+
+        BigDecimal updatedBalance = player.getBalance().subtract(amount);
+        playerService.updateBalance(player, updatedBalance);
+
+        Transaction transaction = new Transaction(player.getId(), Transaction.TransactionType.DEBIT, amount, transactionId);
+        transactionRepository.addTransaction(transaction);
+    }
 
     /**
      * Проверяет наличие транзакции с данным ID в репозитории транзакций.
@@ -91,11 +97,11 @@ public class TransactionService {
      * @param player Игрок, осуществляющий операцию.
      * @throws TransactionExistsException если транзакция с данным ID уже существует.
      */
-//    private void checkTransactionIdExists(UUID transactionId, Player player) throws TransactionExistsException {
-//        if (transactionRepository.existsById(transactionId)) {
-//            throw new TransactionExistsException("Транзакция с данным ID уже существует.");
-//        }
-//    }
+    private void checkTransactionIdExists(UUID transactionId, Player player) throws TransactionExistsException {
+        if (transactionRepository.existsById(transactionId)) {
+            throw new TransactionExistsException("Транзакция с данным ID уже существует.");
+        }
+    }
 
     /**
      * Проверяет, является ли указанная сумма положительной.
@@ -105,11 +111,11 @@ public class TransactionService {
      * @param player Игрок, осуществляющий операцию.
      * @throws InvalidAmountException если указанная сумма не положительная.
      */
-//    private void checkAmountPositive(BigDecimal amount, Player player) throws InvalidAmountException {
-//        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-//            throw new InvalidAmountException("Сумма должна быть положительной.");
-//        }
-//    }
+    private void checkAmountPositive(BigDecimal amount, Player player) throws InvalidAmountException {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidAmountException("Сумма должна быть положительной.");
+        }
+    }
 
     /**
      * Проверяет, достаточно ли средств на балансе игрока для осуществления операции.
@@ -119,9 +125,19 @@ public class TransactionService {
      * @param amount Требуемая сумма для сравнения с балансом.
      * @throws InvalidAmountException если на балансе игрока недостаточно средств.
      */
-//    private void checkSufficientBalance(Player player, BigDecimal amount) throws InvalidAmountException {
-//        if (player.getBalance().compareTo(amount) < 0) {
-//            throw new InvalidAmountException("На вашем счету недастаточно средств");
-//        }
-//    }
+    private void checkSufficientBalance(Player player, BigDecimal amount) throws InvalidAmountException {
+        if (player.getBalance().compareTo(amount) < 0) {
+            throw new InvalidAmountException("На вашем счету недастаточно средств");
+        }
+    }
+
+    /**
+     * Возвращает баланс игрока по его идентификатору.
+     *
+     * @param id Идентификатор игрока.
+     * @return Баланс игрока.
+     */
+    public BigDecimal getPlayerBalance(Long id) {
+        return playerService.getPlayerBalance(id);
+    }
 }

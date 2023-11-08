@@ -1,4 +1,4 @@
-package org.example.dto;
+package ylab.ru.application.dto;
 
 import org.springframework.stereotype.Component;
 

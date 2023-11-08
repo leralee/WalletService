@@ -1,4 +1,4 @@
-package ylab.ru.application.exception;
+package ru.ylab.common.exception;
 
 /**
  * Исключение, предназначенное для ситуаций, когда указана недопустимая сумма транзакции.

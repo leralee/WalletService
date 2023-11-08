@@ -1,4 +1,4 @@
-package ru.ylab.common;
+package ru.ylab.common.model;
 
 /**
  * @author valeriali on {06.11.2023}

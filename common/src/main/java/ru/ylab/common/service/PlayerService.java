@@ -1,11 +1,13 @@
-package ylab.ru.application.service;
+package ru.ylab.common.service;
+
+
 
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ylab.ru.application.exception.PlayerExistsException;
-import ylab.ru.application.interfaces.IPlayerRepository;
-import ylab.ru.application.model.Player;
+import ru.ylab.common.exception.PlayerExistsException;
+import ru.ylab.common.interfaces.IPlayerRepository;
+import ru.ylab.common.model.Player;
 
 import java.math.BigDecimal;
 import java.util.Optional;

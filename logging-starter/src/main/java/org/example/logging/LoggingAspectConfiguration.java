@@ -1,8 +1,13 @@
 package org.example.logging;
 
-/**
- * @author valeriali on {08.11.2023}
- * @project walletService
- */
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
 public class LoggingAspectConfiguration {
+
+    @Bean
+    public LoggingAspect loggingAspect() {
+        return new LoggingAspect();
+    }
 }

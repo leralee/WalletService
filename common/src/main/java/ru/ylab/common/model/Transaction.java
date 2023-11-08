@@ -1,4 +1,4 @@
-package ylab.ru.application.model;
+package ru.ylab.common.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

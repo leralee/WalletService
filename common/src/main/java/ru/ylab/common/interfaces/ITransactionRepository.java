@@ -1,7 +1,8 @@
-package ylab.ru.application.interfaces;
+package ru.ylab.common.interfaces;
 
 import ru.ylab.common.model.Transaction;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
@@ -24,4 +25,5 @@ public interface ITransactionRepository {
      * @return true, если транзакция с таким идентификатором существует, иначе false.
      */
     boolean existsById(UUID transactionId);
+
 }

@@ -1,9 +1,10 @@
-package ru.ylab.common;
+package ru.ylab.common.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.ylab.common.model.Audit;
 
 import java.sql.Timestamp;
 import java.util.List;

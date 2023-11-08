@@ -5,14 +5,13 @@ import org.apache.logging.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.example.audit.AuditAspect;
 import org.springframework.stereotype.Component;
 
 @Component
 @Aspect
 public class LoggingAspect {
 
-    private static final Logger logger = LogManager.getLogger(AuditAspect.class);
+    private static final Logger logger = LogManager.getLogger(LoggingAspect.class);
 
     /**
      * Совет Around, регистрирующий время выполнения метода любого сервиса в пакете org.example.service.

@@ -1,8 +1,8 @@
-package ru.ylab.common;
+package ru.ylab.common.repository;
 
 
 
-import ru.ylab.common.Audit;
+import ru.ylab.common.model.Audit;
 
 import java.util.List;
 

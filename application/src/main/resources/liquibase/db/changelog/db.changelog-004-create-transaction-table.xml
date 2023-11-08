@@ -31,7 +31,7 @@
                                  constraintName="fk_transaction_player_id"/>
     </changeSet>
 
-    <changeSet id="create-transaction-id-sequence" author="">
+    <changeSet id="create-transaction-id-sequence" author="Valeria">
         <createSequence sequenceName="transaction_id_seq" schemaName="wallet" startValue="1" incrementBy="1"/>
         <sql>
             ALTER TABLE wallet.transaction ADD id BIGINT DEFAULT nextval('wallet.transaction_id_seq') NOT NULL PRIMARY KEY;

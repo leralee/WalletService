@@ -1,4 +1,4 @@
-package ylab.ru.application.repository;
+package ru.ylab.common.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -30,7 +30,7 @@ public class PlayerRepository implements IPlayerRepository {
      */
     public void save(Player player) {
         String query = "INSERT INTO wallet.player (role, username, password, balance) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(query, player.getRole(), player.getUsername(), player.getPassword(), player.getBalance());
+        jdbcTemplate.update(query, player.getRole().toString(), player.getUsername(), player.getPassword(), player.getBalance());
     }
 
     public void update(Long id, Player player) {

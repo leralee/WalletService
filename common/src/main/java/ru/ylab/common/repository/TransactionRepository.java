@@ -1,12 +1,14 @@
-package ylab.ru.application.repository;
+package ru.ylab.common.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.ylab.common.interfaces.ITransactionRepository;
+import ru.ylab.common.model.Player;
 import ru.ylab.common.model.Transaction;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.UUID;
 
@@ -59,4 +61,5 @@ public class TransactionRepository implements ITransactionRepository {
             return false;
         }
     }
+
 }

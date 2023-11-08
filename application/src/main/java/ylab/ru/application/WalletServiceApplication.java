@@ -1,13 +1,11 @@
-package org.example;
-
-
+package ylab.ru.application;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
-
+import org.example.logging.EnableLoggingAspect;
 
 @SpringBootApplication
+@EnableLoggingAspect
 public class WalletServiceApplication {
     public static void main(String[] args) {
 

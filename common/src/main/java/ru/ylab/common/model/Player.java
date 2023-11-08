@@ -1,4 +1,4 @@
-package ylab.ru.application.model;
+package ru.ylab.common.model;
 
 import org.springframework.stereotype.Component;
 

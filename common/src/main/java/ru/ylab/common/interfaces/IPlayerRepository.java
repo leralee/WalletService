@@ -1,4 +1,4 @@
-package ylab.ru.application.interfaces;
+package ru.ylab.common.interfaces;
 
 import ru.ylab.common.model.Player;
 

@@ -1,12 +1,13 @@
-package org.example.configuration;
+package ylab.ru.application.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import org.example.security.JWTFilter;
-//import org.example.security.JWTUtil;
-
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.*;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import ru.ylab.common.service.PlayerService;
+import ylab.ru.application.security.JWTFilter;
+import ylab.ru.application.security.JWTUtil;
 
 /**
  * Основной класс конфигурации Spring для настройки компонентов веб-приложения.
@@ -18,7 +19,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @EnableWebMvc
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-@PropertySource("classpath:src/main/resources/application.yml")
+@ComponentScan({"ru.ylab.common", "org.example.audit"})
 public class SpringConfig implements WebMvcConfigurer {
 
 
@@ -32,46 +33,42 @@ public class SpringConfig implements WebMvcConfigurer {
         return new ObjectMapper();
     }
 
-//    @Bean
-//    public JWTUtil jwtUtil() {
-//        return new JWTUtil();
-//    }
-//
-//    @Bean
-//    public JWTFilter jwtFilter(JWTUtil jwtUtil, PlayerService playerService) {
-//        return new JWTFilter(jwtUtil, playerService);
-//    }
-
-//    @Bean
-//    public FilterRegistrationBean<JWTFilter> jwtFilterRegistration(JWTFilter jwtFilter) {
-//        FilterRegistrationBean<JWTFilter> registrationBean = new FilterRegistrationBean<>(jwtFilter);
-//        registrationBean.addUrlPatterns("/balances", "/admin");
-//        return registrationBean;
-//    }
-
+    /**
+     * Создает бин для утилиты работы с JWT (JSON Web Token).
+     * <p>Этот бин предоставляет методы для генерации и проверки JSON Web Token'ов.</p>
+     *
+     * @return новый экземпляр {@link JWTUtil}.
+     */
+    @Bean
+    public JWTUtil jwtUtil() {
+        return new JWTUtil();
+    }
 
     /**
-     * Настраивает обработчики ресурсов для добавления путей к ресурсам Swagger UI.
+     * Создает бин фильтра JWT, который используется для обработки и проверки запросов с JWT.
+     * <p>Этот фильтр сверяет JWT в запросах и определяет, имеет ли пользователь право на выполнение операций.</p>
      *
-     * @param registry реестр обработчиков ресурсов
+     * @param jwtUtil Утилита для работы с JWT.
+     * @param playerService Сервис для работы с данными игроков.
+     * @return новый экземпляр {@link JWTFilter}.
      */
-//    @Override
-//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-//        registry
-//                .addResourceHandler("/swagger-ui/**")
-//                .addResourceLocations("classpath:/META-INF/resources/webjars/springfox-swagger-ui/")
-//                .resourceChain(false);
-//    }
+    @Bean
+    public JWTFilter jwtFilter(JWTUtil jwtUtil, PlayerService playerService) {
+        return new JWTFilter(jwtUtil, playerService);
+    }
 
     /**
-     * Настраивает контроллеры представлений для перенаправления на Swagger UI.
+     * Регистрирует бин фильтра JWT для определенных URL-паттернов.
+     * <p>Этот метод настраивает фильтр JWT для обеспечения безопасности определенных эндпоинтов.</p>
      *
-     * @param registry реестр контроллеров представлений
+     * @param jwtFilter Фильтр JWT, который необходимо зарегистрировать.
+     * @return регистрационный бин {@link FilterRegistrationBean} для фильтра JWT.
      */
-//    @Override
-//    public void addViewControllers(ViewControllerRegistry registry) {
-//        registry.addViewController("/swagger-ui/")
-//                .setViewName("forward:" + "/swagger-ui/index.html");
-//    }
+    @Bean
+    public FilterRegistrationBean<JWTFilter> jwtFilterRegistration(JWTFilter jwtFilter) {
+        FilterRegistrationBean<JWTFilter> registrationBean = new FilterRegistrationBean<>(jwtFilter);
+        registrationBean.addUrlPatterns("/balances", "/admin");
+        return registrationBean;
+    }
 
 }
