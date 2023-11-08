@@ -1,0 +1,24 @@
+jwt:
+  secret: MANGO
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/wallet_service_db
+    username: valeriali
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    change-log: classpath:/liquibase/db/changelog/master.xml
+    default-schema: migration
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+
+
+
+
+
