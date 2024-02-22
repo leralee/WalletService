@@ -6,7 +6,6 @@
 		<groupId>org.example</groupId>
 		<artifactId>walletService</artifactId>
 		<version>1.0-SNAPSHOT</version>
-
 	</parent>
 	<groupId>ylab.ru</groupId>
 	<artifactId>application</artifactId>
@@ -19,30 +18,10 @@
 		<testcontainers>1.19.1</testcontainers>
 	</properties>
 	<dependencies>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>testcontainers</artifactId>
-			<version>${testcontainers}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>jdbc</artifactId>
-			<version>${testcontainers}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>${testcontainers}</version>
+			<version>3.1.5</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -54,16 +33,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<version>${junit-jupiter.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<version>${junit-jupiter.version}</version>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${testcontainers}</version>
 			<scope>test</scope>
 		</dependency>
 

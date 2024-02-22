@@ -11,6 +11,27 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+  vis:
+    image: visual_service
+    environment:
+      DATA_PORT: 5001
+      MODEL_PORT: 5002
+    ports:
+      - "5000:5000"
+    restart: always
+  data:
+    image: data_service
+    ports:
+      - "5001:5001"
+    restart: always
+  model:
+    image: model_service
+    environment:
+      DATA_PORT: 5001
+    ports:
+      - "5002:5002"
+    restart: always
+
 
 volumes:
   pgdata:

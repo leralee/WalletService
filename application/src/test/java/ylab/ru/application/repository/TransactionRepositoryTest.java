@@ -16,12 +16,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.ylab.common.model.Transaction;
-import ru.ylab.common.repository.PlayerRepository;
 import ru.ylab.common.repository.TransactionRepository;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;

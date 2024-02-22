@@ -15,7 +15,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.ylab.common.model.Player;
-import ru.ylab.common.repository.AuditRepository;
 import ru.ylab.common.repository.PlayerRepository;
 import javax.sql.DataSource;
 import java.util.Optional;

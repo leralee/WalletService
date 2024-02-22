@@ -1,4 +1,4 @@
-package ru.ylab.common.service;
+package ylab.ru.application.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -7,6 +7,8 @@ import ru.ylab.common.exception.InvalidAmountException;
 import ru.ylab.common.exception.TransactionExistsException;
 import ru.ylab.common.model.Player;
 import ru.ylab.common.repository.TransactionRepository;
+import ru.ylab.common.service.PlayerService;
+import ru.ylab.common.service.TransactionService;
 
 
 import java.math.BigDecimal;
