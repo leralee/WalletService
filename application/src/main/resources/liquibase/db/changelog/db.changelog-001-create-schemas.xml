@@ -9,10 +9,10 @@
         </sql>
     </changeSet>
 
-    <changeSet id="create-migration-schema" author="Valeria">
-        <sql>
-            CREATE SCHEMA IF NOT EXISTS migration;
-        </sql>
-    </changeSet>
+<!--    <changeSet id="create-migration-schema" author="Valeria">-->
+<!--        <sql>-->
+<!--            CREATE SCHEMA IF NOT EXISTS migration;-->
+<!--        </sql>-->
+<!--    </changeSet>-->
 
 </databaseChangeLog>

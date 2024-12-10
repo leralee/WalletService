@@ -3,13 +3,16 @@ jwt:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/wallet_service_db
-    username: valeriali
-    password: postgres
+#    url: jdbc:postgresql://localhost:5432/wallet_service_db
+#    username: valeriali
+#    password: postgres
+    url: jdbc:postgresql://dpg-ctbneil6l47c73b33ukg-a.oregon-postgres.render.com/walletdb_1fo1
+    username: walletdb_1fo1_user
+    password: SP4aHdjnA4aMn1ip4JGrh0Soxq3Ye9Ok
     driver-class-name: org.postgresql.Driver
   liquibase:
     change-log: classpath:/liquibase/db/changelog/master.xml
-    default-schema: migration
+#    default-schema: wallet
 
 springdoc:
   api-docs:
