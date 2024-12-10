@@ -1,0 +1,66 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      # Шаг 1: Checkout кода из репозитория
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Шаг 2: Установка Java и Maven
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # Шаг 3: Кэширование зависимостей Maven
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven
+
+      # Шаг 4: Сборка проекта
+      - name: Build with Maven
+        run: mvn clean package
+
+      # Шаг 5: Запуск тестов
+      - name: Run Unit Tests
+        run: mvn test
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Render CLI
+        run: curl -fsSL https://cli.render.com/install.sh | bash
+
+      - name: Deploy to Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          render deploy service --service-id srv-ctc2u4jtq21c73dj01g0
+
+
+
+
+
+          
