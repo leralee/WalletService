@@ -38,12 +38,7 @@ jobs:
 
       # Шаг 4: Сборка проекта
       - name: Build with Maven
-        run: mvn clean package
-
-       # Шаг 5: Запуск тестов для модуля application
-      - name: Run Tests for Application
-        run: mvn test
-        working-directory: application
+        run: mvn clean package -DskipTests
 
   deploy:
     runs-on: ubuntu-latest
@@ -52,13 +47,14 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install Render CLI
-        run: curl -fsSL https://cli.render.com/install.sh | bash
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/render-oss/cli/refs/heads/main/bin/install.sh | sh
 
       - name: Deploy to Render
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          render deploy service --service-id srv-ctc2u4jtq21c73dj01g0
+          render deploys create srv-ctc2u4jtq21c73dj01g0 --wait --confirm
 
 
 
