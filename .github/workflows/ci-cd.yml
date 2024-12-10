@@ -46,11 +46,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Check Internet Connectivity
-        run: |
-          curl -I https://google.com
-          nslookup cli.render.com
-
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
