@@ -40,9 +40,10 @@ jobs:
       - name: Build with Maven
         run: mvn clean package
 
-      # Шаг 5: Запуск тестов
-      - name: Run Unit Tests
+       # Шаг 5: Запуск тестов для модуля application
+      - name: Run Tests for Application
         run: mvn test
+        working-directory: application
 
   deploy:
     runs-on: ubuntu-latest
