@@ -53,7 +53,7 @@ jobs:
 
       - name: Install Render CLI via npm
         run: |
-          npm install render/cli -g
+          npm install render-cli -g
           echo "Render CLI version:"
           render --version
 
