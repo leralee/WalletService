@@ -4,8 +4,10 @@ FROM openjdk:21-jdk-slim
 # Указываем рабочую директорию внутри контейнера
 WORKDIR /app
 
-# Копируем файл сборки JAR в контейнер
-COPY application/target/application-1.0.0-SNAPSHOT.jar app.jar
+COPY . .
+RUN mvn clean package
 
-# Указываем команду запуска приложения
-ENTRYPOINT ["java", "-jar", "app.jar"]
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=builder /app/application/target/application-1.0.0-SNAPSHOT.jar app.jar
+CMD ["java", "-jar", "app.jar"]
