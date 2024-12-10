@@ -54,7 +54,7 @@ jobs:
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          render deploy service --service-id srv-ctc2u4jtq21c73dj01g0
+          render deploys create srv-ctc2u4jtq21c73dj01g0 --wait --confirm
 
 
 
