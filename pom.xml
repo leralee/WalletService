@@ -5,6 +5,7 @@
     <module>audit-starter</module>
     <module>logging-starter</module>
     <module>common</module>
+    <module>application</module>
   </modules>
 
   <parent>
