@@ -38,7 +38,7 @@ jobs:
 
       # Шаг 4: Сборка проекта
       - name: Build with Maven
-        run: mvn clean package
+        run: mvn clean package -DskipTests
 
        # Шаг 5: Запуск тестов для модуля application
       - name: Run Tests for Application
