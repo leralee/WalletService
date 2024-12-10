@@ -46,16 +46,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-
-      - name: Install Render CLI via npm
+      - name: Install Render CLI
         run: |
-          npm install render-cli -g
-          echo "Render CLI version:"
-          render --version
+          curl -fsSL https://raw.githubusercontent.com/render-oss/cli/refs/heads/main/bin/install.sh | sh
 
       - name: Deploy to Render
         env:
