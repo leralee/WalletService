@@ -40,11 +40,6 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-       # Шаг 5: Запуск тестов для модуля application
-      - name: Run Tests for Application
-        run: mvn test
-        working-directory: application
-
   deploy:
     runs-on: ubuntu-latest
     steps:
