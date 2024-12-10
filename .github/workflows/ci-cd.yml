@@ -46,10 +46,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Render CLI
+      - name: Check Internet Connectivity
         run: |
-          curl -fsSL https://cli.render.com/install.sh | bash
-          export PATH=$HOME/.render/bin:$PATH
+          curl -I https://google.com
+          nslookup cli.render.com
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install Render CLI via npm
+        run: |
+          npm install -g @render/cli
           echo "Render CLI version:"
           render --version
 
